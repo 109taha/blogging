@@ -14,7 +14,10 @@ const BlogSchema = new mongoose.Schema(
           enum: ["image", "heading", "text"],
           require: true,
         },
-        contant: String,
+        content: {
+          type: String,
+          require: true,
+        },
       },
     ],
   },
