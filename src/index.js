@@ -28,6 +28,8 @@ app.get("/", (req, res) => {
 
 const User = require("./routes/userRoutes");
 const Blog = require("./routes/blogRoutes");
+const Query = require("./routes/anyQueryRoutes");
 
 app.use("/user", User);
 app.use("/blog", Blog);
+app.use("/qu", Query);
