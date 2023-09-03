@@ -77,14 +77,18 @@ router.get("/all/blogs", async (req, res) => {
 router.get("/one/blogs/:Id", async (req, res) => {
   try {
     const blogID = req.params.Id;
-    const allBlog = await Blog.findOne({ _id: blogID });
-    console.log(allBlog);
-    if (allBlog === null) {
-      return res.status(400).send("no blog found!");
+    const updatedBlog = await Blog.findOneAndUpdate(
+      { _id: blogID },
+      { $inc: { views: 1 } },
+      { new: true }
+    );
+    if (!updatedBlog) {
+      return res.status(400).send("No blog found!");
     }
-    res.status(200).send({ success: true, allBlog });
+
+    res.status(200).send({ success: true, updatedBlog });
   } catch (error) {
-    console.error("Error creating blog post:", error);
+    console.error("Error updating blog view count:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -104,4 +108,5 @@ router.delete("/delete/blog/:Id", async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+
 module.exports = router;

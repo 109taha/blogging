@@ -20,6 +20,9 @@ const BlogSchema = new mongoose.Schema(
         },
       },
     ],
+    views: {
+      type: Number,
+    },
   },
   { timestamps: true }
 );
