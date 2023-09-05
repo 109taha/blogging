@@ -34,6 +34,9 @@ const UserSchema = new mongoose.Schema(
       trim: true,
       require: true,
     },
+    devicetoken: {
+      type: String,
+    },
   },
   {
     timestamps: true,

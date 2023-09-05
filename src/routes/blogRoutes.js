@@ -5,6 +5,30 @@ const upload = require("../helper/multer");
 const fs = require("fs");
 const { verifyAdmin } = require("../middleWares/verify");
 const JWT = require("jsonwebtoken");
+const admin = require("firebase-admin");
+const User = require("../model/userSchema");
+
+const serviceAccount = require("../../blogging-10898-firebase-adminsdk-7g07k-3621afe093.json");
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+const sendNotification = async (title, body, deviceToken) => {
+  const message = {
+    notification: {
+      title: title,
+      body: body,
+    },
+    token: deviceToken, // The device token for the user
+  };
+
+  try {
+    const response = await admin.messaging().send(message);
+    console.log("Successfully sent FCM message:", response);
+  } catch (error) {
+    console.error("Error sending FCM message:", error);
+  }
+};
 
 router.post(
   "/create/blog",
@@ -53,6 +77,19 @@ router.post(
         data: data,
       });
       await newBlog.save();
+      const user = await User.find();
+
+      let tokendeviceArray = [];
+      for (let index = 0; index < user.length; index++) {
+        const element = user[index];
+
+        tokendeviceArray.push(element.devicetoken);
+      }
+
+      const title = "New Blog Post";
+      const body = "Check out our latest blog post!";
+      const deviceToken = tokendeviceArray;
+      sendNotification(title, body, deviceToken);
       res.status(200).send({ success: true, newBlog });
     } catch (error) {
       console.error("Error creating blog post:", error);
