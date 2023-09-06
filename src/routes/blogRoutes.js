@@ -98,6 +98,59 @@ router.post(
   }
 );
 
+router.put(
+  "/update/blog/:blogId",
+  verifyAdmin,
+  upload.array("attachArtwork", 1),
+  async (req, res) => {
+    const blogId = req.params.blogId;
+
+    const files = req.files;
+    const attachArtwork = [];
+    try {
+      if (!files || files?.length < 1) {
+      } else {
+        for (const file of files) {
+          const { path } = file;
+          try {
+            const uploader = await cloudinary.uploader.upload(path, {
+              folder: "24-Karat",
+            });
+            attachArtwork.push({ url: uploader.url });
+            fs.unlinkSync(path);
+          } catch (err) {
+            if (attachArtwork?.length) {
+              const imgs = imgObjs.map((obj) => obj.public_id);
+              cloudinary.api.delete_resources(imgs);
+            }
+            console.log(err);
+          }
+        }
+      }
+
+      const data = JSON.parse(req.body.data);
+
+      for (const item of data) {
+        if (item.ctype === "image" && attachArtwork.length > 0) {
+          item.content = attachArtwork[0].url;
+          break;
+        }
+      }
+
+      const updatedBlog = await Blog.findByIdAndUpdate(
+        blogId,
+        { $set: { data } },
+        { new: true }
+      );
+
+      res.status(200).send({ success: true, updatedBlog });
+    } catch (error) {
+      console.error("Error updating blog post:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
+
 router.get("/all/blogs", async (req, res) => {
   try {
     const allBlog = await Blog.find();

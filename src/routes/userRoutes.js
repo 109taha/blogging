@@ -253,7 +253,6 @@ router.post("/login/:deviceToken", async (req, res) => {
   }
 });
 
-module.exports = router;
 router.delete("/delete/user/:id", async (req, res) => {
   try {
     const userId = req.params.id;
