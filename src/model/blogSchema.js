@@ -20,6 +20,11 @@ const BlogSchema = new mongoose.Schema(
         },
       },
     ],
+    Categories: {
+      type: mongoose.Schema.Types.ObjectId,
+      require: true,
+      ref: "Categories",
+    },
     views: {
       type: Number,
     },

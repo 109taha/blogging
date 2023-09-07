@@ -7,6 +7,7 @@ const { verifyAdmin } = require("../middleWares/verify");
 const JWT = require("jsonwebtoken");
 const admin = require("firebase-admin");
 const User = require("../model/userSchema");
+const Categories = require("../model/blogCategories");
 
 const serviceAccount = require("../../blogging-10898-firebase-adminsdk-7g07k-3621afe093.json");
 admin.initializeApp({
@@ -19,7 +20,7 @@ const sendNotification = async (title, body, deviceToken) => {
       title: title,
       body: body,
     },
-    token: deviceToken, // The device token for the user
+    token: deviceToken,
   };
 
   try {
@@ -29,6 +30,54 @@ const sendNotification = async (title, body, deviceToken) => {
     console.error("Error sending FCM message:", error);
   }
 };
+
+router.post("/create/category", verifyAdmin, async (req, res) => {
+  try {
+    const { name, description } = req.body;
+    if (!name || !description) {
+      return res
+        .status(404)
+        .send({ message: "you have to provide Name and Description!" });
+    }
+    const alreadyCreated = await Categories.findOne({ name: req.body.name });
+    if (alreadyCreated) {
+      return res.status(200).send(`You already created ${name} Category`);
+    }
+    const newCategory = new Categories({
+      name,
+      description,
+    });
+    await newCategory.save();
+    res.status(200).send({ message: "Category Add Successfully" });
+  } catch (error) {
+    console.error("Error creating blog post:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/all/category", async (req, res) => {
+  try {
+    const allCategory = await Categories.find();
+    if (!allCategory.length > 0) {
+      return res.status(404).send("no Category found");
+    }
+    res.status(200).send({ success: true, allCategory });
+  } catch (error) {
+    console.error("Error creating blog post:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.delete("/delete/category/:id", verifyAdmin, async (req, res) => {
+  try {
+    const categoryId = req.params.id;
+    const deletedCategory = await Categories.findByIdAndDelete(categoryId);
+    res.status(200).send("Category deleted successfully");
+  } catch (error) {
+    console.error("Error creating blog post:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 router.post(
   "/create/blog",
@@ -183,7 +232,7 @@ router.get("/one/blogs/:Id", async (req, res) => {
   }
 });
 
-router.delete("/delete/blog/:Id", async (req, res) => {
+router.delete("/delete/blog/:Id", verifyAdmin, async (req, res) => {
   try {
     const blogID = req.params.Id;
     const allBlog = await Blog.findOneAndDelete({ _id: blogID });
