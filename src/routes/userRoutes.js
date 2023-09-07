@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const Admin = require("../model/adminSchema");
 const User = require("../model/userSchema");
 const { AdminJoiSchema, UserJoiSchema } = require("../helper/joi/joiSchema");
+const sendResetEmail = require("../helper/nodemailer");
 
 router.post("/create/admin", AdminJoiSchema, async (req, res) => {
   try {
@@ -47,6 +48,41 @@ router.post("/create/admin", AdminJoiSchema, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error: " + error.message);
+  }
+});
+
+router.post("/reset-password/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const password = req.body.password;
+
+    const user = await User.findById(userId);
+
+    if (user) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      user.password = hashedPassword;
+      await user.save();
+
+      res.status(200).json({ message: "Password reset successful" });
+    }
+    const staff = await Admin.findById(userId);
+
+    if (staff) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      staff.password = hashedPassword;
+      await staff.save();
+
+      res.status(200).json({ message: "Password reset successful" });
+    }
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Internal Server Error: " + error.message });
   }
 });
 
