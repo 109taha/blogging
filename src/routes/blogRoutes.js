@@ -31,29 +31,58 @@ const sendNotification = async (title, body, deviceToken) => {
   }
 };
 
-router.post("/create/category", verifyAdmin, async (req, res) => {
-  try {
-    const { name, description } = req.body;
-    if (!name || !description) {
-      return res
-        .status(404)
-        .send({ message: "you have to provide Name and Description!" });
+router.post(
+  "/create/category",
+  verifyAdmin,
+  upload.array("attachArtwork", 1),
+  async (req, res) => {
+    const files = req.files;
+    const attachArtwork = [];
+
+    try {
+      if (!files || files?.length < 1) {
+      } else {
+        for (const file of files) {
+          const { path } = file;
+          try {
+            const uploader = await cloudinary.uploader.upload(path, {
+              folder: "blogging",
+            });
+            attachArtwork.push({ url: uploader.url });
+            fs.unlinkSync(path);
+          } catch (err) {
+            if (attachArtwork?.length) {
+              const imgs = imgObjs.map((obj) => obj.public_id);
+              cloudinary.api.delete_resources(imgs);
+            }
+            console.log(err);
+          }
+        }
+      }
+
+      const { name, description } = req.body;
+      if (!name || !description) {
+        return res
+          .status(404)
+          .send({ message: "you have to provide Name and Description!" });
+      }
+      const alreadyCreated = await Categories.findOne({ name: req.body.name });
+      if (alreadyCreated) {
+        return res.status(200).send(`You already created ${name} Category`);
+      }
+      const newCategory = new Categories({
+        name,
+        description,
+        img: attachArtwork[0].url,
+      });
+      await newCategory.save();
+      res.status(200).send({ message: "Category Add Successfully" });
+    } catch (error) {
+      console.error("Error creating blog post:", error);
+      return res.status(500).json({ error: "Internal server error" });
     }
-    const alreadyCreated = await Categories.findOne({ name: req.body.name });
-    if (alreadyCreated) {
-      return res.status(200).send(`You already created ${name} Category`);
-    }
-    const newCategory = new Categories({
-      name,
-      description,
-    });
-    await newCategory.save();
-    res.status(200).send({ message: "Category Add Successfully" });
-  } catch (error) {
-    console.error("Error creating blog post:", error);
-    return res.status(500).json({ error: "Internal server error" });
   }
-});
+);
 
 router.get("/all/category", async (req, res) => {
   try {

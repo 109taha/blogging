@@ -28,11 +28,12 @@ const BlogSchema = new mongoose.Schema(
         },
       },
     ],
-    categories: {
-      type: String,
-      require: true,
-      ref: "Categories",
-    },
+    categories: [
+      {
+        type: String,
+        require: true,
+      },
+    ],
     views: {
       type: Number,
     },
