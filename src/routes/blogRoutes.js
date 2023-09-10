@@ -84,7 +84,7 @@ router.post(
   verifyAdmin,
   upload.fields([
     { name: "featureImg", maxCount: 1 },
-    { name: "attachArtwork", maxCount: 1 },
+    { name: "images", maxCount: 5 },
   ]),
   async (req, res) => {
     try {
@@ -95,22 +95,24 @@ router.post(
           success: false,
           message: "You have to upload at least one image to the listing",
         });
-      for (const file in files) {
-        try {
-          const uploader = await cloudinary.uploader.upload(
-            files[file][0].path,
-            {
-              folder: "Blogging",
+      for (const fileArray in files) {
+        for (const file in files[fileArray]) {
+          try {
+            const uploader = await cloudinary.uploader.upload(
+              files[fileArray][file].path,
+              {
+                folder: "Blogging",
+              }
+            );
+            attachArtwork.push({ url: uploader.url, type: fileArray });
+            fs.unlinkSync(files[fileArray][file].path);
+          } catch (err) {
+            if (attachArtwork?.length) {
+              const imgs = imgObjs.map((obj) => obj.public_id);
+              cloudinary.api.delete_resources(imgs);
             }
-          );
-          attachArtwork.push({ url: uploader.url });
-          fs.unlinkSync(files[file][0].path);
-        } catch (err) {
-          if (attachArtwork?.length) {
-            const imgs = imgObjs.map((obj) => obj.public_id);
-            cloudinary.api.delete_resources(imgs);
+            console.log(err);
           }
-          console.log(err);
         }
       }
 
@@ -118,16 +120,24 @@ router.post(
       const { titles, categories } = req.body;
 
       const categoryName = await Categories.findById(categories);
-      for (const item of data) {
-        if (item.ctype === "image") {
-          item.content = attachArtwork[1].url;
-          break;
+
+      const featureImgMain = attachArtwork[0].url;
+
+      attachArtwork.shift();
+
+      let attachArtworkCount = 0;
+
+      for (let testIndex = 0; testIndex < data.length; testIndex++) {
+        if (data[testIndex].ctype == "image") {
+          data[testIndex].content = attachArtwork[attachArtworkCount].url;
+          attachArtworkCount++;
         }
       }
+
       const userId = req.user;
       const newBlog = new Blog({
         adminId: userId,
-        featureImg: attachArtwork[0].url,
+        featureImg: featureImgMain,
         title: titles,
         data: data,
         categories: categoryName.name,

@@ -193,17 +193,17 @@ router.get("/find/user/:id", async (req, res) => {
 
 router.post("/login/:deviceToken", async (req, res) => {
   try {
-    const { user_name, password } = req.body;
+    const { email, password } = req.body;
     const deviceToken = req.params.deviceToken;
 
-    if (!user_name || !password || !deviceToken) {
+    if (!email || !password || !deviceToken) {
       return res.status(400).json({
         success: false,
-        message: "Please provide user_name, password, and deviceToken.",
+        message: "Please provide email, password, and deviceToken.",
       });
     }
 
-    const admin = await Admin.findOne({ user_name });
+    const admin = await Admin.findOne({ email });
 
     if (admin) {
       const validAdminPassword = await bcrypt.compare(password, admin.password);
@@ -226,7 +226,7 @@ router.post("/login/:deviceToken", async (req, res) => {
       }
     }
 
-    const user = await User.findOne({ user_name });
+    const user = await User.findOne({ email });
 
     if (user) {
       const validUserPassword = await bcrypt.compare(password, user.password);
@@ -248,7 +248,7 @@ router.post("/login/:deviceToken", async (req, res) => {
 
     return res.status(400).json({
       success: false,
-      message: "Invalid user_name or password. Please check your credentials.",
+      message: "Invalid email or password. Please check your credentials.",
     });
   } catch (error) {
     console.error(error);
