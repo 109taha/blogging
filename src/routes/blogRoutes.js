@@ -90,7 +90,6 @@ router.post(
     try {
       const files = req.files;
       const attachArtwork = [];
-      console.log(attachArtwork);
       if (!files || files?.length < 1)
         return res.status(401).json({
           success: false,
@@ -119,10 +118,9 @@ router.post(
       const { titles, categories } = req.body;
 
       const categoryName = await Categories.findById(categories);
-      console.log();
       for (const item of data) {
         if (item.ctype === "image") {
-          item.content = attachArtwork[0].url;
+          item.content = attachArtwork[1].url;
           break;
         }
       }
@@ -147,7 +145,7 @@ router.post(
       const title = "New Blog Post";
       const body = "Check out our latest blog post!";
       const deviceToken = tokendeviceArray;
-      sendNotification(title, body, deviceToken);
+      // sendNotification(title, body, deviceToken);
 
       res.status(200).json({ success: true, newBlog });
     } catch (error) {
