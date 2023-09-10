@@ -28,8 +28,8 @@ const BlogSchema = new mongoose.Schema(
         },
       },
     ],
-    Categories: {
-      type: mongoose.Schema.Types.ObjectId,
+    categories: {
+      type: String,
       require: true,
       ref: "Categories",
     },

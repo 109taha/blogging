@@ -116,8 +116,10 @@ router.post(
       }
 
       const data = JSON.parse(req.body.data);
-      const titles = req.body.title;
+      const { titles, categories } = req.body;
 
+      const categoryName = await Categories.findById(categories);
+      console.log();
       for (const item of data) {
         if (item.ctype === "image") {
           item.content = attachArtwork[0].url;
@@ -130,6 +132,7 @@ router.post(
         featureImg: attachArtwork[0].url,
         title: titles,
         data: data,
+        categories: categoryName.name,
       });
       await newBlog.save();
       const user = await User.find();
