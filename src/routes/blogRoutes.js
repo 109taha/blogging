@@ -295,4 +295,17 @@ router.delete("/delete/blog/:Id", verifyAdmin, async (req, res) => {
   }
 });
 
+router.get("/search/blog/:title", async (req, res, next) => {
+  try {
+    const searchfield = req.params.title;
+    const blog = await Blog.find({
+      title: { $regex: searchfield, $options: "i" },
+    });
+    const item = { blog };
+    res.status(200).send(item);
+  } catch (error) {
+    res.status(500).send({ message: "Internal server error" });
+  }
+});
+
 module.exports = router;
