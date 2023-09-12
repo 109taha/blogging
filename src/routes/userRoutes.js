@@ -5,6 +5,7 @@ const Admin = require("../model/adminSchema");
 const User = require("../model/userSchema");
 const { AdminJoiSchema, UserJoiSchema } = require("../helper/joi/joiSchema");
 const sendResetEmail = require("../helper/nodemailer");
+const { verifyUser } = require("../middleWares/verify");
 
 router.post("/create/admin", AdminJoiSchema, async (req, res) => {
   try {
@@ -45,6 +46,70 @@ router.post("/create/admin", AdminJoiSchema, async (req, res) => {
     res
       .status(200)
       .send({ success: true, message: "Admin registerd successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+});
+
+router.post("/saved/blog", verifyUser, async (req, res) => {
+  try {
+    const user = req.user;
+    const savedBlog = req.body.savedBlog;
+
+    const userFromDB = await User.findById(user);
+    if (!userFromDB) {
+      return res.status(404).send("User not found");
+    }
+
+    if (userFromDB.savedBloged.includes(savedBlog)) {
+      return res.status(400).send("Blog already saved");
+    }
+
+    userFromDB.savedBloged.push(savedBlog);
+
+    await userFromDB.save();
+
+    return res.status(200).send("Blog saved successfully");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+});
+
+router.post("/unsaved/blog", verifyUser, async (req, res) => {
+  try {
+    const user = req.user;
+    const unsavedBlog = req.body.unsavedBlog;
+
+    const userFromDB = await User.findById(user);
+    if (!userFromDB) {
+      return res.status(404).send("User not found");
+    }
+
+    userFromDB.savedBloged = userFromDB.savedBloged.filter(
+      (blogId) => blogId.toString() !== unsavedBlog
+    );
+
+    await userFromDB.save();
+
+    return res.status(200).send("Blog unsaved successfully");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+});
+
+router.get("/saved/blogs", verifyUser, async (req, res) => {
+  try {
+    const user = req.user;
+
+    const userWithBlogs = await User.findById(user).populate("savedBloged");
+    if (!userWithBlogs) {
+      return res.status(404).send("User not found");
+    }
+    const blogged = userWithBlogs.savedBloged;
+    return res.status(200).json(blogged);
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error: " + error.message);

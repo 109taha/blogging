@@ -37,6 +37,12 @@ const UserSchema = new mongoose.Schema(
     devicetoken: {
       type: String,
     },
+    savedBloged: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Blog",
+      },
+    ],
   },
   {
     timestamps: true,

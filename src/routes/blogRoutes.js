@@ -147,19 +147,33 @@ router.post(
 
       const data = JSON.parse(req.body.data);
       const { titles, categories } = req.body;
-
+      if (!titles || !categories) {
+        return res
+          .status(400)
+          .send("you have to add title and category of the blog");
+      }
       const categoryName = await Categories.findById(categories);
+      console.log(categoryName);
 
       const featureImgMain = attachArtwork[0].url;
 
       attachArtwork.shift();
 
       let attachArtworkCount = 0;
-
+      console.log(attachArtwork);
       for (let testIndex = 0; testIndex < data.length; testIndex++) {
         if (data[testIndex].ctype == "image") {
-          data[testIndex].content = attachArtwork[attachArtworkCount].url;
-          attachArtworkCount++;
+          // Check if attachArtworkCount is within bounds
+          if (attachArtworkCount < attachArtwork.length) {
+            data[testIndex].content = attachArtwork[attachArtworkCount].url;
+            attachArtworkCount++;
+          } else {
+            // Handle the case where attachArtwork is exhausted
+            console.error(
+              "Not enough elements in attachArtwork to cover all images."
+            );
+            break; // Exit the loop or handle this case accordingly
+          }
         }
       }
 
@@ -172,18 +186,18 @@ router.post(
         categories: categoryName.name,
       });
       await newBlog.save();
-      const user = await User.find();
+      // const user = await User.find();
 
-      let tokendeviceArray = [];
-      for (let index = 0; index < user.length; index++) {
-        const element = user[index];
+      // let tokendeviceArray = [];
+      // for (let index = 0; index < user.length; index++) {
+      //   const element = user[index];
 
-        tokendeviceArray.push(element.devicetoken);
-      }
+      //   tokendeviceArray.push(element.devicetoken);
+      // }
 
-      const title = "New Blog Post";
-      const body = "Check out our latest blog post!";
-      const deviceToken = tokendeviceArray;
+      // const title = "New Blog Post";
+      // const body = "Check out our latest blog post!";
+      // const deviceToken = tokendeviceArray;
       // sendNotification(title, body, deviceToken);
 
       res.status(200).json({ success: true, newBlog });
