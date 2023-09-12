@@ -51,33 +51,46 @@ router.post("/create/admin", AdminJoiSchema, async (req, res) => {
   }
 });
 
-router.post("/forgot-password", async (req, res) => {
+router.post("/forgot-password/user", async (req, res) => {
   try {
     const email = req.body.email;
 
     const user = await User.findOne({ email });
     if (user) {
-      const token = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
-      console.log(token);
-      sendResetEmail(email, token);
-      return res.json({
-        success: true,
-        message: "Check your email for the verification code.",
-        token,
-      });
+      return res.status(400).send("No user found on that email");
     }
+    const token = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
+    console.log(token);
+    sendResetEmail(email, token);
+    res.json({
+      success: true,
+      message: "Check your email for the verification code.",
+      token,
+    });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .send({ message: "Internal Server Error: " + error.message });
+  }
+});
+
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const email = req.body.email;
+
     const staff = await Admin.findOne({ email });
     if (staff) {
-      const token = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
-      console.log(token);
-      sendResetEmail(email, token);
-      return res.json({
-        success: true,
-        message: "Check your email for the verification code.",
-        token,
-      });
+      return res.stats(400).send("no Admin found on that email");
     }
-    res.status(404).send("No User found on that email");
+    const token = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
+    console.log(token);
+    sendResetEmail(email, token);
+    res.json({
+      success: true,
+      message: "Check your email for the verification code.",
+      token,
+    });
   } catch (error) {
     console.error(error);
     res
@@ -235,41 +248,54 @@ router.post("/login", async (req, res) => {
 
     const admin = await Admin.findOne({ email });
 
-    if (admin) {
-      const validAdminPassword = await bcrypt.compare(password, admin.password);
-
-      if (validAdminPassword) {
-        const token = JWT.sign(
-          { userId: admin._id },
-          process.env.JWT_SEC_ADMIN
-        );
-
-        return res.status(200).json({
-          success: true,
-          message: "Admin login successful",
-          token,
-          user: admin,
-        });
-      }
+    if (!admin) {
+      return res.status(404).send({ message: "No admin found on that email" });
     }
+    const validAdminPassword = await bcrypt.compare(password, admin.password);
 
+    if (validAdminPassword) {
+      const token = JWT.sign({ userId: admin._id }, process.env.JWT_SEC_ADMIN);
+
+      return res.status(200).json({
+        success: true,
+        message: "Admin login successful",
+        token,
+        user: admin,
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
+
+router.post("/login/user", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide email, password.",
+      });
+    }
     const user = await User.findOne({ email });
 
-    if (user) {
-      const validUserPassword = await bcrypt.compare(password, user.password);
-
-      if (validUserPassword) {
-        const token = JWT.sign({ userId: user._id }, process.env.JWT_SEC);
-
-        return res.status(200).json({
-          success: true,
-          message: "User login successful",
-          token,
-          user,
-        });
-      }
+    if (!user) {
+      return res.status(404).send("No user found on that Email");
     }
+    const validUserPassword = await bcrypt.compare(password, user.password);
 
+    if (validUserPassword) {
+      const token = JWT.sign({ userId: user._id }, process.env.JWT_SEC);
+
+      return res.status(200).json({
+        success: true,
+        message: "User login successful",
+        token,
+        user,
+      });
+    }
     return res.status(400).json({
       success: false,
       message: "Invalid email or password. Please check your credentials.",
