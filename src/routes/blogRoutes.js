@@ -148,10 +148,7 @@ router.get("/all/category", async (req, res) => {
     const skip = (page - 1) * limit;
     const total = await Categories.countDocuments();
 
-    const allCategory = await Categories.find()
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 });
+    const allCategory = await Categories.find().sort({ createdAt: -1 });
 
     if (!allCategory.length > 0) {
       return res.status(404).send("No Category found");
@@ -162,9 +159,6 @@ router.get("/all/category", async (req, res) => {
     res.status(200).send({
       success: true,
       allCategory,
-      page,
-      totalPages,
-      limit,
       total,
     });
   } catch (error) {
