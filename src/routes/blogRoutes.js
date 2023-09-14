@@ -83,68 +83,70 @@ router.post(
     }
   }
 );
-router.put(
-  "/update/category/:categoryId",
-  verifyAdmin,
-  upload.array("attachArtwork", 1),
-  async (req, res) => {
-    const files = req.files;
-    const attachArtwork = [];
 
-    try {
-      const categoryId = req.params.categoryId;
-      const category = await Categories.findById(categoryId);
+// router.put(
+//   "/update/category/:categoryId",
+//   verifyAdmin,
+//   upload.array("attachArtwork", 1),
+//   async (req, res) => {
+//     const files = req.files;
+//     const attachArtwork = [];
 
-      if (!category) {
-        return res.status(404).send({ message: "Category not found" });
-      }
+//     try {
+//       const categoryId = req.params.categoryId;
+//       const category = await Categories.findById(categoryId);
 
-      if (!files || files?.length < 1) {
-      } else {
-        for (const file of files) {
-          const { path } = file;
-          try {
-            const uploader = await cloudinary.uploader.upload(path, {
-              folder: "blogging",
-            });
-            attachArtwork.push({ url: uploader.url });
-            fs.unlinkSync(path);
-          } catch (err) {
-            if (attachArtwork?.length) {
-              const imgs = attachArtwork.map((obj) => obj.public_id);
-              cloudinary.api.delete_resources(imgs);
-            }
-            console.log(err);
-          }
-        }
-      }
-      console.log(attachArtwork);
-      const { name, description } = req.body;
+//       if (!category) {
+//         return res.status(404).send({ message: "Category not found" });
+//       }
 
-      if (!name || !description) {
-        return res
-          .status(400)
-          .send({ message: "Name and Description are required" });
-      }
+//       if (!files || files?.length < 1) {
+//       } else {
+//         for (const file of files) {
+//           const { path } = file;
+//           try {
+//             const uploader = await cloudinary.uploader.upload(path, {
+//               folder: "blogging",
+//             });
+//             attachArtwork.push({ url: uploader.url });
+//             fs.unlinkSync(path);
+//           } catch (err) {
+//             if (attachArtwork?.length) {
+//               const imgs = attachArtwork.map((obj) => obj.public_id);
+//               cloudinary.api.delete_resources(imgs);
+//             }
+//             console.log(err);
+//           }
+//         }
+//       }
+//       console.log(attachArtwork);
+//       const { name, description } = req.body;
 
-      category.name = name;
-      category.description = description;
-      category.img = attachArtwork[0].url;
+//       if (!name || !description) {
+//         return res
+//           .status(400)
+//           .send({ message: "Name and Description are required" });
+//       }
 
-      await category.save();
-      res.status(200).send({ message: "Category Updated Successfully" });
-    } catch (error) {
-      console.error("Error updating category:", error);
-      return res.status(500).json({ error: "Internal server error" });
-    }
-  }
-);
+//       category.name = name;
+//       category.description = description;
+//       category.img = attachArtwork[0].url;
+
+//       await category.save();
+//       res.status(200).send({ message: "Category Updated Successfully" });
+//     } catch (error) {
+//       console.error("Error updating category:", error);
+//       return res.status(500).json({ error: "Internal server error" });
+//     }
+//   }
+// );
 
 router.get("/all/category", async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = 10;
     const skip = (page - 1) * limit;
+    const total = await Categories.countDocuments();
 
     const allCategory = await Categories.find()
       .skip(skip)
@@ -163,6 +165,7 @@ router.get("/all/category", async (req, res) => {
       page,
       totalPages,
       limit,
+      total,
     });
   } catch (error) {
     console.error("Error retrieving categories:", error);
@@ -337,6 +340,7 @@ router.get("/all/blogs", async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.page, 10) || 5;
     const skip = (page - 1) * limit;
+    const total = await Blog.countDocuments();
 
     const allBlog = await Blog.find()
       .skip(skip)
@@ -351,7 +355,7 @@ router.get("/all/blogs", async (req, res) => {
 
     res
       .status(200)
-      .send({ success: true, data: allBlog, page, totalPages, limit });
+      .send({ success: true, data: allBlog, page, totalPages, limit, total });
   } catch (error) {
     console.error("Error creating blog post:", error);
     return res.status(500).json({ error: "Internal server error" });
