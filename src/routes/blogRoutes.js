@@ -83,16 +83,89 @@ router.post(
     }
   }
 );
+router.put(
+  "/update/category/:categoryId",
+  verifyAdmin,
+  upload.array("attachArtwork", 1),
+  async (req, res) => {
+    const files = req.files;
+    const attachArtwork = [];
+
+    try {
+      const categoryId = req.params.categoryId;
+      const category = await Categories.findById(categoryId);
+
+      if (!category) {
+        return res.status(404).send({ message: "Category not found" });
+      }
+
+      if (!files || files?.length < 1) {
+      } else {
+        for (const file of files) {
+          const { path } = file;
+          try {
+            const uploader = await cloudinary.uploader.upload(path, {
+              folder: "blogging",
+            });
+            attachArtwork.push({ url: uploader.url });
+            fs.unlinkSync(path);
+          } catch (err) {
+            if (attachArtwork?.length) {
+              const imgs = attachArtwork.map((obj) => obj.public_id);
+              cloudinary.api.delete_resources(imgs);
+            }
+            console.log(err);
+          }
+        }
+      }
+      console.log(attachArtwork);
+      const { name, description } = req.body;
+
+      if (!name || !description) {
+        return res
+          .status(400)
+          .send({ message: "Name and Description are required" });
+      }
+
+      category.name = name;
+      category.description = description;
+      category.img = attachArtwork[0].url;
+
+      await category.save();
+      res.status(200).send({ message: "Category Updated Successfully" });
+    } catch (error) {
+      console.error("Error updating category:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
 
 router.get("/all/category", async (req, res) => {
   try {
-    const allCategory = await Categories.find();
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    const allCategory = await Categories.find()
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
     if (!allCategory.length > 0) {
-      return res.status(404).send("no Category found");
+      return res.status(404).send("No Category found");
     }
-    res.status(200).send({ success: true, allCategory });
+
+    const totalPages = Math.ceil(allCategory.length / limit);
+
+    res.status(200).send({
+      success: true,
+      allCategory,
+      page,
+      totalPages,
+      limit,
+    });
   } catch (error) {
-    console.error("Error creating blog post:", error);
+    console.error("Error retrieving categories:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -163,16 +236,14 @@ router.post(
       console.log(attachArtwork);
       for (let testIndex = 0; testIndex < data.length; testIndex++) {
         if (data[testIndex].ctype == "image") {
-          // Check if attachArtworkCount is within bounds
           if (attachArtworkCount < attachArtwork.length) {
             data[testIndex].content = attachArtwork[attachArtworkCount].url;
             attachArtworkCount++;
           } else {
-            // Handle the case where attachArtwork is exhausted
             console.error(
               "Not enough elements in attachArtwork to cover all images."
             );
-            break; // Exit the loop or handle this case accordingly
+            break;
           }
         }
       }
@@ -263,11 +334,24 @@ router.put(
 
 router.get("/all/blogs", async (req, res) => {
   try {
-    const allBlog = await Blog.find();
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.page, 10) || 5;
+    const skip = (page - 1) * limit;
+
+    const allBlog = await Blog.find()
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
     if (!allBlog.length > 0) {
       return res.status(400).send("no blog found!");
     }
-    res.status(200).send({ success: true, allBlog });
+
+    const totalPages = Math.ceil(allBlog.length / limit);
+
+    res
+      .status(200)
+      .send({ success: true, data: allBlog, page, totalPages, limit });
   } catch (error) {
     console.error("Error creating blog post:", error);
     return res.status(500).json({ error: "Internal server error" });
