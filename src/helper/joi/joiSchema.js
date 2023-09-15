@@ -8,6 +8,7 @@ const AdminSchema = Joi.object({
   password: Joi.string().required(),
   devicetoken: Joi.string().required(),
 });
+
 const AdminJoiSchema = (req, res, next) => {
   const { error } = AdminSchema.validate(req.body, { abortEarly: false });
   if (error) {
@@ -25,6 +26,7 @@ const UserSchema = Joi.object({
   password: Joi.string().required(),
   devicetoken: Joi.string().required(),
 });
+
 const UserJoiSchema = (req, res, next) => {
   const { error } = UserSchema.validate(req.body, { abortEarly: false });
   if (error) {
