@@ -61,9 +61,17 @@ router.post("/saved/blog", verifyUser, async (req, res) => {
     if (!userFromDB) {
       return res.status(404).send("User not found");
     }
-
     if (userFromDB.savedBloged.includes(savedBlog)) {
-      return res.status(400).send("Blog already saved");
+      // return res.status(400).send("Blog already saved");
+
+      userFromDB.savedBloged = userFromDB.savedBloged.filter(
+        (item) => item.toString() != savedBlog
+      );
+      console.log(userFromDB.savedBloged);
+
+      await userFromDB.save();
+
+      return res.status(200).send("Blog unsaved successfully");
     }
 
     userFromDB.savedBloged.push(savedBlog);
@@ -77,28 +85,28 @@ router.post("/saved/blog", verifyUser, async (req, res) => {
   }
 });
 
-router.post("/unsaved/blog", verifyUser, async (req, res) => {
-  try {
-    const user = req.user;
-    const unsavedBlog = req.body.unsavedBlog;
+// router.post("/unsaved/blog", verifyUser, async (req, res) => {
+//   try {
+//     const user = req.user;
+//     const unsavedBlog = req.body.unsavedBlog;
 
-    const userFromDB = await User.findById(user);
-    if (!userFromDB) {
-      return res.status(404).send("User not found");
-    }
+//     const userFromDB = await User.findById(user);
+//     if (!userFromDB) {
+//       return res.status(404).send("User not found");
+//     }
 
-    userFromDB.savedBloged = userFromDB.savedBloged.filter(
-      (blogId) => blogId.toString() !== unsavedBlog
-    );
+//     userFromDB.savedBloged = userFromDB.savedBloged.filter(
+//       (blogId) => blogId.toString() !== unsavedBlog
+//     );
 
-    await userFromDB.save();
+//     await userFromDB.save();
 
-    return res.status(200).send("Blog unsaved successfully");
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Internal Server Error: " + error.message);
-  }
-});
+//     return res.status(200).send("Blog unsaved successfully");
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Internal Server Error: " + error.message);
+//   }
+// });
 
 router.get("/saved/blogs", verifyUser, async (req, res) => {
   try {

@@ -167,6 +167,28 @@ router.get("/all/category", async (req, res) => {
   }
 });
 
+router.get("/blog/category", async (req, res) => {
+  try {
+    const allCategory = await Categories.find().sort({ createdAt: -1 });
+    console.log(allCategory);
+
+    if (!allCategory.length > 0) {
+      return res.status(404).send("No Category found");
+    }
+
+    const totalPages = Math.ceil(allCategory.length / limit);
+
+    res.status(200).send({
+      success: true,
+      allCategory,
+      total,
+    });
+  } catch (error) {
+    console.error("Error retrieving categories:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.delete("/delete/category/:id", verifyAdmin, async (req, res) => {
   try {
     const categoryId = req.params.id;
