@@ -345,7 +345,7 @@ router.get("/all/blogs", async (req, res) => {
       return res.status(400).send("no blog found!");
     }
 
-    const totalPages = Math.ceil(allBlog.length / limit);
+    const totalPages = Math.ceil(total / limit);
 
     res
       .status(200)
