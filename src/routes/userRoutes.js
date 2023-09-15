@@ -67,7 +67,6 @@ router.post("/saved/blog", verifyUser, async (req, res) => {
       userFromDB.savedBloged = userFromDB.savedBloged.filter(
         (item) => item.toString() != savedBlog
       );
-      console.log(userFromDB.savedBloged);
 
       await userFromDB.save();
 

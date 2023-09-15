@@ -167,21 +167,17 @@ router.get("/all/category", async (req, res) => {
   }
 });
 
-router.get("/blog/category", async (req, res) => {
+router.post("/blog/category", async (req, res) => {
   try {
-    const allCategory = await Categories.find().sort({ createdAt: -1 });
-    console.log(allCategory);
-
-    if (!allCategory.length > 0) {
-      return res.status(404).send("No Category found");
+    const categorys = req.body.category;
+    const allBlog = await Blog.find({ categories: [categorys] });
+    if (!allBlog.length > 0) {
+      return res.status(404).send(`No Blog found on ${categorys} category`);
     }
-
-    const totalPages = Math.ceil(allCategory.length / limit);
 
     res.status(200).send({
       success: true,
-      allCategory,
-      total,
+      allBlog,
     });
   } catch (error) {
     console.error("Error retrieving categories:", error);
