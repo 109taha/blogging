@@ -357,7 +357,8 @@ router.get("/all/blogs", async (req, res) => {
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 })
-      .select("title featureImg");
+      .select("title featureImg createdAt");
+    console.log(allBlog);
 
     if (!allBlog.length > 0) {
       return res.status(400).send("no blog found!");
