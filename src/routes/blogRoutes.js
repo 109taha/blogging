@@ -225,7 +225,7 @@ router.post(
             fs.unlinkSync(files[fileArray][file].path);
           } catch (err) {
             if (attachArtwork?.length) {
-              const imgs = imgObjs.map((obj) => obj.public_id);
+              const imgs = attachArtwork.map((obj) => obj.public_id);
               cloudinary.api.delete_resources(imgs);
             }
             console.log(err);
@@ -270,19 +270,19 @@ router.post(
         categories,
       });
       await newBlog.save();
-      // const user = await User.find();
+      const user = await User.find();
 
-      // let tokendeviceArray = [];
-      // for (let index = 0; index < user.length; index++) {
-      //   const element = user[index];
-
-      //   tokendeviceArray.push(element.devicetoken);
-      // }
-
-      // const title = "New Blog Post";
-      // const body = "Check out our latest blog post!";
-      // const deviceToken = tokendeviceArray;
-      // sendNotification(title, body, deviceToken);
+      let tokendeviceArray = [];
+      for (let index = 0; index < user.length; index++) {
+        const element = user[index];
+        element.devicetoken == undefined
+          ? " "
+          : tokendeviceArray.push(element.devicetoken);
+      }
+      const title = "New Blog Post";
+      const body = "Check out our latest blog post!";
+      const deviceToken = tokendeviceArray;
+      !deviceToken.length > 0 && sendNotification(title, body, deviceToken);
 
       res.status(200).json({ success: true, newBlog });
     } catch (error) {

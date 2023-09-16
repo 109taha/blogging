@@ -24,7 +24,6 @@ const UserSchema = Joi.object({
   phone_number: Joi.number().required(),
   email: Joi.string().required(),
   password: Joi.string().required(),
-  devicetoken: Joi.string().required(),
 });
 
 const UserJoiSchema = (req, res, next) => {
