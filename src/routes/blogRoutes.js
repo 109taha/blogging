@@ -240,9 +240,7 @@ router.post(
           .status(400)
           .send("you have to add title and category of the blog");
       }
-      const categoryName = await Categories.findById(categories);
-      console.log(categoryName);
-
+      console.log(categories);
       const featureImgMain = attachArtwork[0].url;
 
       attachArtwork.shift();
@@ -269,7 +267,7 @@ router.post(
         featureImg: featureImgMain,
         title: titles,
         data: data,
-        categories: categoryName.name,
+        categories,
       });
       await newBlog.save();
       // const user = await User.find();
@@ -355,10 +353,11 @@ router.get("/all/blogs", async (req, res) => {
     const total = await Blog.countDocuments();
 
     const allBlog = await Blog.find()
+      .populate("categories")
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
-
+    console.log(allBlog);
     if (!allBlog.length > 0) {
       return res.status(400).send("no blog found!");
     }
@@ -381,7 +380,8 @@ router.get("/one/blogs/:Id", async (req, res) => {
       { _id: blogID },
       { $inc: { views: 1 } },
       { new: true }
-    );
+    ).populate("categories");
+
     if (!updatedBlog) {
       return res.status(400).send("No blog found!");
     }
