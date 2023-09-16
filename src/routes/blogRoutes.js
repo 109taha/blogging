@@ -353,11 +353,12 @@ router.get("/all/blogs", async (req, res) => {
     const total = await Blog.countDocuments();
 
     const allBlog = await Blog.find()
-      .populate("categories")
+      .populate({ path: "categories", select: "name" })
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 });
-    console.log(allBlog);
+      .sort({ createdAt: -1 })
+      .select("title featureImg");
+
     if (!allBlog.length > 0) {
       return res.status(400).send("no blog found!");
     }
