@@ -416,7 +416,8 @@ router.get("/search/blog/:title", async (req, res, next) => {
     const searchfield = req.params.title;
     const blog = await Blog.find({
       title: { $regex: searchfield, $options: "i" },
-    });
+    }).select("featureImg title createdAt");
+    console.log(blog);
     const item = { blog };
     res.status(200).send(item);
   } catch (error) {
