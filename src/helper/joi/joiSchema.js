@@ -6,8 +6,7 @@ const AdminSchema = Joi.object({
   phone_number: Joi.number().required(),
   email: Joi.string().required(),
   password: Joi.string().required(),
-  devicetoken: Joi.string().required(),
-});
+}).unknown(true);
 
 const AdminJoiSchema = (req, res, next) => {
   const { error } = AdminSchema.validate(req.body, { abortEarly: false });
@@ -24,7 +23,7 @@ const UserSchema = Joi.object({
   phone_number: Joi.number().required(),
   email: Joi.string().required(),
   password: Joi.string().required(),
-});
+}).unknown(true);
 
 const UserJoiSchema = (req, res, next) => {
   const { error } = UserSchema.validate(req.body, { abortEarly: false });

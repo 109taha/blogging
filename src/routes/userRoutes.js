@@ -11,14 +11,7 @@ router.post("/create/admin", AdminJoiSchema, async (req, res) => {
   try {
     const { user_name, email, name, password, phone_number, devicetoken } =
       req.body;
-    if (
-      !user_name ||
-      !email ||
-      !name ||
-      !password ||
-      !phone_number ||
-      !devicetoken
-    ) {
+    if (!user_name || !email || !name || !password || !phone_number) {
       return res.status(400).send("you have to provide all of the feild");
     }
     const exisitUser = await Admin.findOne({ email });
