@@ -9,7 +9,7 @@ const admin = require("firebase-admin");
 const User = require("../model/userSchema");
 const Categories = require("../model/blogCategories");
 
-const serviceAccount = require("../../blogging-10898-firebase-adminsdk-7g07k-3621afe093.json");
+const serviceAccount = require("../../yess-73871-firebase-adminsdk-plmdc-cbdab0a4bf.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
@@ -84,62 +84,6 @@ router.post(
   }
 );
 
-// router.put(
-//   "/update/category/:categoryId",
-//   verifyAdmin,
-//   upload.array("attachArtwork", 1),
-//   async (req, res) => {
-//     const files = req.files;
-//     const attachArtwork = [];
-
-//     try {
-//       const categoryId = req.params.categoryId;
-//       const category = await Categories.findById(categoryId);
-
-//       if (!category) {
-//         return res.status(404).send({ message: "Category not found" });
-//       }
-
-//       if (!files || files?.length < 1) {
-//       } else {
-//         for (const file of files) {
-//           const { path } = file;
-//           try {
-//             const uploader = await cloudinary.uploader.upload(path, {
-//               folder: "blogging",
-//             });
-//             attachArtwork.push({ url: uploader.url });
-//             fs.unlinkSync(path);
-//           } catch (err) {
-//             if (attachArtwork?.length) {
-//               const imgs = attachArtwork.map((obj) => obj.public_id);
-//               cloudinary.api.delete_resources(imgs);
-//             }
-//             console.log(err);
-//           }
-//         }
-//       }
-//       console.log(attachArtwork);
-//       const { name, description } = req.body;
-
-//       if (!name || !description) {
-//         return res
-//           .status(400)
-//           .send({ message: "Name and Description are required" });
-//       }
-
-//       category.name = name;
-//       category.description = description;
-//       category.img = attachArtwork[0].url;
-
-//       await category.save();
-//       res.status(200).send({ message: "Category Updated Successfully" });
-//     } catch (error) {
-//       console.error("Error updating category:", error);
-//       return res.status(500).json({ error: "Internal server error" });
-//     }
-//   }
-// );
 
 router.get("/all/category", async (req, res) => {
   try {
@@ -430,7 +374,7 @@ router.get("/search/blog/category/:category", async (req, res, next) => {
     const searchfield = req.params.category;
     const blog = await Blog.find({
       categories: searchfield
-    }).select("featureImg title categories createdAt")
+    }).select("featureImg title createdAt").populate({path: "categories", select: "name"})
     const item = { blog };
     res.status(200).send(item);
   } catch (error) {
