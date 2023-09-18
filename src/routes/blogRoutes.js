@@ -430,7 +430,7 @@ router.get("/search/blog/category/:category", async (req, res, next) => {
     const searchfield = req.params.category;
     const blog = await Blog.find({
       categories: searchfield
-    })
+    }).select("featureImg title categories createdAt")
     const item = { blog };
     res.status(200).send(item);
   } catch (error) {
