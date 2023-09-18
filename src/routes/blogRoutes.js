@@ -5,14 +5,17 @@ const upload = require("../helper/multer");
 const fs = require("fs");
 const { verifyAdmin } = require("../middleWares/verify");
 const JWT = require("jsonwebtoken");
-const admin = require("firebase-admin");
+// const admin = require("firebase-admin");
 const User = require("../model/userSchema");
 const Categories = require("../model/blogCategories");
+var FCM = require('fcm-node');
+    var serverKey = 'AAAAncxknVY:APA91bF0lO2y2PjfdEQ28tEIWRfovUfkjoFhwa16pl69cpxoW38MDS3I3eHIqH2nWF-C26xpG537hni3FR3DqsUxARQS88j1hQJdKEPQ4jdvWIowtvtaZkNudO6di8OStxqtsvoF50ZH'; //put your server key here
+    var fcm = new FCM(serverKey);
 
-const serviceAccount = require("../../yess-73871-firebase-adminsdk-plmdc-cbdab0a4bf.json");
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
+// const serviceAccount = require("../../");
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+// });
 
 const sendNotification = async (title, body, deviceToken) => {
   const message = {
@@ -20,11 +23,11 @@ const sendNotification = async (title, body, deviceToken) => {
       title: title,
       body: body,
     },
-    token: deviceToken,
+    to: deviceToken,
   };
 
   try {
-    const response = await admin.messaging().send(message);
+    const response = await fcm.send(message);
     console.log("Successfully sent FCM message:", response);
   } catch (error) {
     console.error("Error sending FCM message:", error);
@@ -228,7 +231,7 @@ router.post(
       const body = `Check out our latest blog post! here is new Blog ${newBlog._id}`;
       const deviceToken = tokendeviceArray;
       !deviceToken.length > 0 && sendNotification(title, body, deviceToken);
-
+      
       res.status(200).json({ success: true, newBlog });
     } catch (error) {
       console.error("Error creating blog post:", error);
