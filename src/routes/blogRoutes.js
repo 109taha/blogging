@@ -215,7 +215,7 @@ router.post(
       });
       await newBlog.save();
       const user = await User.find();
-
+      console.log("Notification started")
       let tokendeviceArray = [];
       for (let index = 0; index < user.length; index++) {
         const element = user[index];
@@ -223,8 +223,9 @@ router.post(
           ? " "
           : tokendeviceArray.push(element.devicetoken);
       }
+      console.log("Device Token ==>", tokendeviceArray)
       const title = "New Blog Post";
-      const body = "Check out our latest blog post!";
+      const body = `Check out our latest blog post! here is new Blog ${newBlog._id}`;
       const deviceToken = tokendeviceArray;
       !deviceToken.length > 0 && sendNotification(title, body, deviceToken);
 
