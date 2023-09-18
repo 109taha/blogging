@@ -5,33 +5,33 @@ const upload = require("../helper/multer");
 const fs = require("fs");
 const { verifyAdmin } = require("../middleWares/verify");
 const JWT = require("jsonwebtoken");
-// const admin = require("firebase-admin");
 const User = require("../model/userSchema");
 const Categories = require("../model/blogCategories");
 var FCM = require('fcm-node');
-    var serverKey = 'AAAAncxknVY:APA91bF0lO2y2PjfdEQ28tEIWRfovUfkjoFhwa16pl69cpxoW38MDS3I3eHIqH2nWF-C26xpG537hni3FR3DqsUxARQS88j1hQJdKEPQ4jdvWIowtvtaZkNudO6di8OStxqtsvoF50ZH'; //put your server key here
+    var serverKey = process.env.SERVERKEY
     var fcm = new FCM(serverKey);
 
-// const serviceAccount = require("../../");
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount),
-// });
 
-const sendNotification = async (title, body, deviceToken) => {
+
+const sendNotification = async (title, body, deviceToken, ID) => {
   const message = {
     notification: {
       title: title,
       body: body,
     },
     to: deviceToken,
-  };
-
-  try {
-    const response = await fcm.send(message);
-    console.log("Successfully sent FCM message:", response);
-  } catch (error) {
-    console.error("Error sending FCM message:", error);
+    data: {  
+      my_key: ID,
   }
+  };
+      
+  fcm.send(message, function(err, response){
+    if (err) {
+        console.log("Something has gone wrong!");
+    } else {
+        console.log("Successfully sent with response: ", response);
+    }
+})
 };
 
 router.post(
@@ -218,7 +218,6 @@ router.post(
       });
       await newBlog.save();
       const user = await User.find();
-      console.log("Notification started")
       let tokendeviceArray = [];
       for (let index = 0; index < user.length; index++) {
         const element = user[index];
@@ -226,11 +225,14 @@ router.post(
           ? " "
           : tokendeviceArray.push(element.devicetoken);
       }
-      console.log("Device Token ==>", tokendeviceArray)
       const title = "New Blog Post";
-      const body = `Check out our latest blog post! here is new Blog ${newBlog._id}`;
+      const body = `${newBlog.title}`;
       const deviceToken = tokendeviceArray;
-      deviceToken.length > 0 && sendNotification(title, body, deviceToken);
+      const ID = newBlog._id
+      deviceToken.length > 0 && deviceToken.forEach(eachToken => {
+        sendNotification(title, body, eachToken, ID )
+      });;
+      
       
       res.status(200).json({ success: true, newBlog });
     } catch (error) {
