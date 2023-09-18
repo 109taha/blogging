@@ -230,7 +230,7 @@ router.post(
       const title = "New Blog Post";
       const body = `Check out our latest blog post! here is new Blog ${newBlog._id}`;
       const deviceToken = tokendeviceArray;
-      !deviceToken.length > 0 && sendNotification(title, body, deviceToken);
+      deviceToken.length > 0 && sendNotification(title, body, deviceToken);
       
       res.status(200).json({ success: true, newBlog });
     } catch (error) {
