@@ -146,40 +146,60 @@ router.delete("/delete/category/:id", verifyAdmin, async (req, res) => {
 router.post(
   "/create/blog",
   verifyAdmin,
-  upload.fields([
-    { name: "featureImg", maxCount: 1 },
-    { name: "images", maxCount: 5 },
-  ]),
+  upload.array("featureImg", 1),
   async (req, res) => {
+    // try {
+    //   const files = req.files;
+    //   const attachArtwork = [];
+    //   if (!files || files?.length < 1)
+    //     return res.status(401).json({
+    //       success: false,
+    //       message: "You have to upload at least one image to the listing",
+    //     });
+    //   for (const fileArray in files) {
+    //     for (const file in files[fileArray]) {
+    //       try {
+    //         const uploader = await cloudinary.uploader.upload(
+    //           files[fileArray][file].path,
+    //           {
+    //             folder: "Blogging",
+    //           }
+    //         );
+    //         attachArtwork.push({ url: uploader.url, type: fileArray });
+    //         fs.unlinkSync(files[fileArray][file].path);
+    //       } catch (err) {
+    //         if (attachArtwork?.length) {
+    //           const imgs = attachArtwork.map((obj) => obj.public_id);
+    //           cloudinary.api.delete_resources(imgs);
+    //         }
+    //         console.log(err);
+    //       }
+    //     }
+    //   }
+    const files = req.files;
+    const featureImg = [];
+
     try {
-      const files = req.files;
-      const attachArtwork = [];
-      if (!files || files?.length < 1)
-        return res.status(401).json({
-          success: false,
-          message: "You have to upload at least one image to the listing",
-        });
-      for (const fileArray in files) {
-        for (const file in files[fileArray]) {
+      if (!files || files?.length < 1) {
+      } else {
+        for (const file of files) {
+          const { path } = file;
           try {
-            const uploader = await cloudinary.uploader.upload(
-              files[fileArray][file].path,
-              {
-                folder: "Blogging",
-              }
-            );
-            attachArtwork.push({ url: uploader.url, type: fileArray });
-            fs.unlinkSync(files[fileArray][file].path);
+            const uploader = await cloudinary.uploader.upload(path, {
+              folder: "blogging",
+            });
+            featureImg.push({ url: uploader.url });
+            fs.unlinkSync(path);
           } catch (err) {
-            if (attachArtwork?.length) {
-              const imgs = attachArtwork.map((obj) => obj.public_id);
+            if (featureImg?.length) {
+              const imgs = imgObjs.map((obj) => obj.public_id);
               cloudinary.api.delete_resources(imgs);
             }
             console.log(err);
           }
         }
       }
-
+      console.log(featureImg)
       const data = JSON.parse(req.body.data);
       const { titles, categories } = req.body;
       if (!titles || !categories) {
@@ -211,7 +231,7 @@ router.post(
       const userId = req.user;
       const newBlog = new Blog({
         adminId: userId,
-        featureImg: featureImgMain,
+        featureImg: featureImg[0].url,
         title: titles,
         data: data,
         categories,
