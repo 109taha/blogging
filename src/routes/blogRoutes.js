@@ -188,25 +188,25 @@ router.post(
           .send("you have to add title and category of the blog");
       }
       console.log(categories);
-      const featureImgMain = attachArtwork[0].url;
+   
+      // const featureImgMain = attachArtwork[0].url;
+      // attachArtwork.shift();
 
-      attachArtwork.shift();
-
-      let attachArtworkCount = 0;
-      console.log(attachArtwork);
-      for (let testIndex = 0; testIndex < data.length; testIndex++) {
-        if (data[testIndex].ctype == "image") {
-          if (attachArtworkCount < attachArtwork.length) {
-            data[testIndex].content = attachArtwork[attachArtworkCount].url;
-            attachArtworkCount++;
-          } else {
-            console.error(
-              "Not enough elements in attachArtwork to cover all images."
-            );
-            break;
-          }
-        }
-      }
+      // let attachArtworkCount = 0;
+      // console.log(attachArtwork);
+      // for (let testIndex = 0; testIndex < data.length; testIndex++) {
+      //   if (data[testIndex].ctype == "image") {
+      //     if (attachArtworkCount < attachArtwork.length) {
+      //       data[testIndex].content = attachArtwork[attachArtworkCount].url;
+      //       attachArtworkCount++;
+      //     } else {
+      //       console.error(
+      //         "Not enough elements in attachArtwork to cover all images."
+      //       );
+      //       break;
+      //     }
+      //   }
+      // }
 
       const userId = req.user;
       const newBlog = new Blog({
