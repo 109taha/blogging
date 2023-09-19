@@ -199,7 +199,9 @@ router.post(
           }
         }
       }
-      console.log(featureImg)
+      if (featureImg.length <= 0){
+        return res.status(400).send({message:"you have to add feature Image"})
+      }
       const data = JSON.parse(req.body.data);
       const { titles, categories } = req.body;
       if (!titles || !categories) {
