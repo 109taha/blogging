@@ -245,11 +245,20 @@ router.put("/update/:id", async (req, res) => {
 
 router.get("/find/user", async (req, res) => {
   try {
-    const AllUser = await User.find();
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    const total = await User.countDocuments();
+    const AllUser = await User.find()
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+
     if (!AllUser.length > 0) {
       return res.status(400).send("No user found!");
     }
-    res.status(200).send({ success: true, AllUser });
+    const totalPages = Math.ceil(total / limit);
+    res.status(200).send({ success: true, AllUser, page, totalPages, limit, total });
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error: " + error.message);
