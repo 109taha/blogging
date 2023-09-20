@@ -9,25 +9,21 @@ const { verifyUser } = require("../middleWares/verify");
 
 router.post("/create/admin", AdminJoiSchema, async (req, res) => {
   try {
-    const { user_name, email, name, password, phone_number, devicetoken } =
+    const { email, name, password, phone_number, devicetoken } =
       req.body;
-    if (!user_name || !email || !name || !password || !phone_number) {
+    if ( !email || !name || !password || !phone_number) {
       return res.status(400).send("you have to provide all of the feild");
     }
     const exisitUser = await Admin.findOne({ email });
-    const exisitingUser = await Admin.findOne({ user_name });
     if (exisitUser) {
       return res.status(400).send("User already register, goto login page");
     }
-    if (exisitingUser) {
-      return res.status(400).send("Username already exist, try another");
-    }
+
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     console.log(hashedPassword);
 
     const newAdmin = new Admin({
-      user_name,
       email,
       name,
       password: hashedPassword,
@@ -178,23 +174,18 @@ router.post("/reset-password/:userId", async (req, res) => {
 
 router.post("/create/user", UserJoiSchema, async (req, res) => {
   try {
-    const { user_name, email, name, password, phone_number, devicetoken } =
+    const {  email, name, password, phone_number, devicetoken } =
       req.body;
-    if (!user_name || !email || !name || !password || !phone_number) {
+    if (!email || !name || !password || !phone_number) {
       return res.status(400).send("you have to provide all of the feild");
     }
     const exisitUser = await User.findOne({ email });
-    const exisitingUser = await User.findOne({ user_name });
     if (exisitUser) {
       return res.status(400).send("User already register, goto login page");
-    }
-    if (exisitingUser) {
-      return res.status(400).send("Username already exist, try another");
     }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     const newUser = new User({
-      user_name,
       email,
       name,
       password: hashedPassword,

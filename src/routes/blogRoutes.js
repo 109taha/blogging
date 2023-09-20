@@ -209,7 +209,6 @@ router.post(
           .status(400)
           .send("you have to add title and category of the blog");
       }
-      console.log(categories);
    
       // const featureImgMain = attachArtwork[0].url;
       // attachArtwork.shift();
@@ -247,9 +246,10 @@ router.post(
           ? " "
           : tokendeviceArray.push(element.devicetoken);
       }
+      const newdeviceToken = tokendeviceArray.filter((item, index) => tokendeviceArray.indexOf(item) === index)
       const title = "New Blog Post";
       const body = `${newBlog.title}`;
-      const deviceToken = tokendeviceArray;
+      const deviceToken = newdeviceToken;
       const ID = newBlog._id
       deviceToken.length > 0 && deviceToken.forEach(eachToken => {
         sendNotification(title, body, eachToken, ID )

@@ -1,7 +1,6 @@
 const Joi = require("joi");
 
 const AdminSchema = Joi.object({
-  user_name: Joi.string().required(),
   name: Joi.string().required(),
   phone_number: Joi.number().required(),
   email: Joi.string().required(),
@@ -18,7 +17,6 @@ const AdminJoiSchema = (req, res, next) => {
 };
 
 const UserSchema = Joi.object({
-  user_name: Joi.string().required(),
   name: Joi.string().required(),
   phone_number: Joi.number().required(),
   email: Joi.string().required(),
