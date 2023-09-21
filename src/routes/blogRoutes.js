@@ -126,10 +126,9 @@ router.put(
       categoryUpdated.description = description || categoryUpdated.description,
       categoryUpdated.img = attachArtwork.length > 0 ? attachArtwork[0].url : categoryUpdated.img;
       
-      console.log(categoryUpdated)
-      return 
+      console.log(categoryUpdated) 
       await categoryUpdated.save();
-      res.status(200).send({ message: "Category Add Successfully" });
+      res.status(200).send({ message: "Category updated Successfully" });
     } catch (error) {
       console.error("Error creating blog post:", error);
       return res.status(500).json({ error: "Internal server error" });
