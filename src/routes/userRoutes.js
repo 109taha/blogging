@@ -206,7 +206,7 @@ router.post("/create/user", UserJoiSchema, async (req, res) => {
 router.put("/update/:id", async (req, res) => {
   try {
     const userId = req.params.id;
-    const { user_name, email, name, password, phone_number, devicetoken } =
+    const { email, name, password, phone_number, devicetoken } =
       req.body;
 
     const user = await User.findById(userId);
@@ -214,7 +214,6 @@ router.put("/update/:id", async (req, res) => {
     if (!user) {
       return res.status(404).send("User not found");
     }
-    user.user_name = user_name || user.user_name;
     user.email = email || user.email;
     user.name = name || user.name;
     user.phone_number = phone_number || user.phone_number;
@@ -284,7 +283,7 @@ router.post("/login", async (req, res) => {
     const admin = await Admin.findOne({ email });
 
     if (!admin) {
-      return res.status(404).send({ message: "No admin found on that email" });
+      return res.status(404).send("No admin found on that email");
     }
     const validAdminPassword = await bcrypt.compare(password, admin.password);
 
@@ -331,10 +330,7 @@ router.post("/login/user", async (req, res) => {
         user,
       });
     }
-    return res.status(400).json({
-      success: false,
-      message: "Invalid email or password. Please check your credentials.",
-    });
+    return res.status(400).send("Invalid email or password. Please check your credentials.")
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
