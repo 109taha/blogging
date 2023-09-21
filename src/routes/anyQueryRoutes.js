@@ -63,11 +63,11 @@ router.put("/update/query/:queryId", verifyUser, async (req, res) => {
 
     const query = await Query.findById(queryId);
     if (!query) {
-      return res.status(404).json({ error: "Query not found" });
+      return res.status(404).send("Query not found");
     }
 
     if (query.userId.toString() !== userId.toString()) {
-      return res.status(403).json({ error: "Permission denied" });
+      return res.status(403).sned("Permission denied");
     }
 
     const updatedQuery = req.body.query;

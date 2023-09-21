@@ -67,7 +67,7 @@ router.post(
       if (!name || !description) {
         return res
           .status(404)
-          .send({ message: "you have to provide Name and Description!" });
+          .send("you have to provide Name and Description!");
       }
       const alreadyCreated = await Categories.findOne({ name: req.body.name });
       if (alreadyCreated) {
@@ -200,7 +200,7 @@ router.post(
         }
       }
       if (featureImg.length <= 0){
-        return res.status(400).send({message:"you have to add feature Image"})
+        return res.status(400).send("you have to add feature Image")
       }
       const data = JSON.parse(req.body.data);
       const { titles, categories } = req.body;
