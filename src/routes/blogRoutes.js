@@ -8,10 +8,8 @@ const JWT = require("jsonwebtoken");
 const User = require("../model/userSchema");
 const Categories = require("../model/blogCategories");
 var FCM = require('fcm-node');
-    var serverKey = process.env.SERVERKEY
-    var fcm = new FCM(serverKey);
-
-
+var serverKey = process.env.SERVERKEY
+var fcm = new FCM(serverKey);
 
 const sendNotification = async (title, body, deviceToken, ID) => {
   const message = {
@@ -86,7 +84,6 @@ router.post(
     }
   }
 );
-
 
 router.get("/all/category", async (req, res) => {
   try {
@@ -267,49 +264,50 @@ router.post(
 router.put(
   "/update/blog/:blogId",
   verifyAdmin,
-  upload.array("attachArtwork", 1),
+  upload.array("featureImg", 1),
   async (req, res) => {
     const blogId = req.params.blogId;
 
     const files = req.files;
-    const attachArtwork = [];
+    const featureImg = [];
+
     try {
-      if (!files || files?.length < 1) {
-      } else {
+      if (files && files.length > 0) {
         for (const file of files) {
           const { path } = file;
           try {
             const uploader = await cloudinary.uploader.upload(path, {
-              folder: "24-Karat",
+              folder: "blogging",
             });
-            attachArtwork.push({ url: uploader.url });
+            featureImg.push({ url: uploader.url });
             fs.unlinkSync(path);
           } catch (err) {
-            if (attachArtwork?.length) {
-              const imgs = imgObjs.map((obj) => obj.public_id);
+            if (featureImg.length > 0) {
+              const imgs = featureImg.map((obj) => obj.public_id);
               cloudinary.api.delete_resources(imgs);
             }
             console.log(err);
           }
         }
       }
-
+      const { title, categories } = req.body;
       const data = JSON.parse(req.body.data);
-
-      for (const item of data) {
-        if (item.ctype === "image" && attachArtwork.length > 0) {
-          item.content = attachArtwork[0].url;
-          break;
-        }
+      const updateBlog = await Blog.findById(blogId);
+      console.log(updateBlog)
+      if (!updateBlog) {
+        return res.status(404).json({ error: "Blog not found" });
       }
+      console.log("DATA======>",data)
+      updateBlog.featureImg = featureImg.length > 0 ? featureImg[0].url : updateBlog.featureImg;
+      updateBlog.title = title || updateBlog.title;
+      updateBlog.data = data || updateBlog.data;
+      updateBlog.categories = categories || updateBlog.categories;
 
-      const updatedBlog = await Blog.findByIdAndUpdate(
-        blogId,
-        { $set: { data } },
-        { new: true }
-      );
+      await updateBlog.save();
 
-      res.status(200).send({ success: true, updatedBlog });
+      console.log("updatedBlog: ", updateBlog);
+
+      res.status(200).send({ success: true, updateBlog });
     } catch (error) {
       console.error("Error updating blog post:", error);
       return res.status(500).json({ error: "Internal server error" });

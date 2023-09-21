@@ -12,7 +12,7 @@ router.post("/create/admin", AdminJoiSchema, async (req, res) => {
     const { email, name, password, phone_number, devicetoken } =
       req.body;
     if ( !email || !name || !password || !phone_number) {
-      return res.status(400).send("you have to provide all of the feild");
+      return res.status(400).send("you have to provide all of the felid");
     }
     const exisitUser = await Admin.findOne({ email });
     if (exisitUser) {
@@ -34,7 +34,7 @@ router.post("/create/admin", AdminJoiSchema, async (req, res) => {
     await newAdmin.save();
     res
       .status(200)
-      .send({ success: true, message: "Admin registerd successfully" });
+      .send({ success: true, message: "Admin registered successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error: " + error.message);
@@ -77,7 +77,7 @@ router.get("/saved/blogs", verifyUser, async (req, res) => {
   try {
     const user = req.user;
 
-    const userWithBlogs = await User.findById(user).populate({path: "savedBloged", select:"title featureImg createdAt", populate:{path: "categories", select: "name" }});
+    const userWithBlogs = await User.findById(user).populate({path: "savedBlogged", select:"title featureImg createdAt", populate:{path: "categories", select: "name" }});
     if (!userWithBlogs) {
       return res.status(404).send("User not found");
     }
@@ -176,7 +176,7 @@ router.post("/create/user", UserJoiSchema, async (req, res) => {
     const {  email, name, password, phone_number, devicetoken } =
       req.body;
     if (!email || !name || !password || !phone_number) {
-      return res.status(400).send("you have to provide all of the feild");
+      return res.status(400).send("you have to provide all of the field");
     }
     const exisitUser = await User.findOne({ email });
     if (exisitUser) {
@@ -195,7 +195,7 @@ router.post("/create/user", UserJoiSchema, async (req, res) => {
     await newUser.save();
     res
       .status(200)
-      .send({ success: true, message: "User registerd successfully" });
+      .send({ success: true, message: "User registered successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error: " + error.message);
@@ -315,7 +315,7 @@ router.post("/login/user", async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(404).send("No user found on that Email");
+      return res.status(404).send("Invalid Email!");
     }
     const validUserPassword = await bcrypt.compare(password, user.password);
 
@@ -329,7 +329,7 @@ router.post("/login/user", async (req, res) => {
         user,
       });
     }
-    return res.status(400).send("Invalid email or password. Please check your credentials.")
+    return res.status(400).send("Invalid email or password!")
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
