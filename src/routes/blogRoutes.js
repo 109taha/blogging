@@ -293,19 +293,15 @@ router.put(
       const { title, categories } = req.body;
       const data = JSON.parse(req.body.data);
       const updateBlog = await Blog.findById(blogId);
-      console.log(updateBlog)
       if (!updateBlog) {
         return res.status(404).json({ error: "Blog not found" });
       }
-      console.log("DATA======>",data)
       updateBlog.featureImg = featureImg.length > 0 ? featureImg[0].url : updateBlog.featureImg;
       updateBlog.title = title || updateBlog.title;
       updateBlog.data = data || updateBlog.data;
       updateBlog.categories = categories || updateBlog.categories;
 
       await updateBlog.save();
-
-      console.log("updatedBlog: ", updateBlog);
 
       res.status(200).send({ success: true, updateBlog });
     } catch (error) {
