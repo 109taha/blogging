@@ -124,7 +124,7 @@ router.post("/forgot-password", async (req, res) => {
     const token = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
     console.log(token);
     sendResetEmail(email, token);
-    res.json({
+    res.send({
       success: true,
       message: "Check your email for the verification code.",
       token,
@@ -151,7 +151,7 @@ router.post("/reset-password/:userId", async (req, res) => {
       user.password = hashedPassword;
       await user.save();
 
-      res.status(200).json({ message: "Password reset successful" });
+      res.status(200).send({ message: "Password reset successful" });
     }
     const staff = await Admin.findById(userId);
 
@@ -162,7 +162,7 @@ router.post("/reset-password/:userId", async (req, res) => {
       staff.password = hashedPassword;
       await staff.save();
 
-      res.status(200).json({ message: "Password reset successful" });
+      res.status(200).send({ message: "Password reset successful" });
     }
   } catch (error) {
     console.error(error);
