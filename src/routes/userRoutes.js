@@ -137,13 +137,12 @@ router.post("/forgot-password", async (req, res) => {
   }
 });
 
-router.post("/reset-password/:userId", async (req, res) => {
+router.post("/reset-password/:email", async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userEmail = req.params.email;
     const password = req.body.password;
 
-    const user = await User.findById(userId);
-
+    const user = await User.findOne({email: userEmail});
     if (user) {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
@@ -153,7 +152,7 @@ router.post("/reset-password/:userId", async (req, res) => {
 
       res.status(200).send({ message: "Password reset successful" });
     }
-    const staff = await Admin.findById(userId);
+    const staff = await Admin.findOne({email: userEmail});
 
     if (staff) {
       const salt = await bcrypt.genSalt(10);
