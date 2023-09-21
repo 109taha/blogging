@@ -84,6 +84,58 @@ router.post(
     }
   }
 );
+router.put(
+  "/update/category/:categoryId",
+  verifyAdmin,
+  upload.array("attachArtwork", 1),
+  async (req, res) => {
+    const files = req.files;
+    const attachArtwork = [];
+
+    try {
+      if (files && files.length > 0) {
+        for (const file of files) {
+          const { path } = file;
+          try {
+            const uploader = await cloudinary.uploader.upload(path, {
+              folder: "blogging",
+            });
+            attachArtwork.push({ url: uploader.url });
+            fs.unlinkSync(path);
+          } catch (err) {
+            if (attachArtwork.length > 0) {
+              const imgs = attachArtwork.map((obj) => obj.public_id);
+              cloudinary.api.delete_resources(imgs);
+            }
+            console.log(err);
+          }
+        }
+      }
+      
+      const categoryId = req.params.categoryId
+      const { name, description } = req.body;
+      
+      const categoryUpdated = await Categories.findById(categoryId);
+       console.log(categoryUpdated)
+
+      if (!categoryUpdated || categoryUpdated <= 0) {
+        return res.status(200).send(`no category found`);
+      }
+      
+      categoryUpdated.name = name || categoryUpdated.name,
+      categoryUpdated.description = description || categoryUpdated.description,
+      categoryUpdated.img = attachArtwork.length > 0 ? attachArtwork[0].url : categoryUpdated.img;
+      
+      console.log(categoryUpdated)
+      return 
+      await categoryUpdated.save();
+      res.status(200).send({ message: "Category Add Successfully" });
+    } catch (error) {
+      console.error("Error creating blog post:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
 
 router.get("/all/category", async (req, res) => {
   try {
