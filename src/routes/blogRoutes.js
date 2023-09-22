@@ -49,7 +49,7 @@ router.post(
             const uploader = await cloudinary.uploader.upload(path, {
               folder: "blogging",
             });
-            attachArtwork.push({ url: uploader.url });
+            attachArtwork.push();
             fs.unlinkSync(path);
           } catch (err) {
             if (attachArtwork?.length) {
@@ -84,6 +84,7 @@ router.post(
     }
   }
 );
+
 router.put(
   "/update/category/:categoryId",
   verifyAdmin,
@@ -155,6 +156,26 @@ router.get("/all/category", async (req, res) => {
       success: true,
       allCategory,
       total,
+    });
+  } catch (error) {
+    console.error("Error retrieving categories:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/one/category/:categoryId", async (req, res) => {
+  try {
+    const categoryId = req.params.categoryId
+
+    const category = await Categories.findById(categoryId)
+
+    if (category == null ) {
+      return res.status(404).send("No Category found");
+    }
+
+    res.status(200).send({
+      success: true,
+      category
     });
   } catch (error) {
     console.error("Error retrieving categories:", error);
