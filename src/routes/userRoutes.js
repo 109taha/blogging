@@ -77,7 +77,7 @@ router.get("/saved/blogs", verifyUser, async (req, res) => {
   try {
     const user = req.user;
 
-    const userWithBlogs = await User.findById(user).populate({path: "savedBlogged", select:"title featureImg createdAt", populate:{path: "categories", select: "name" }});
+    const userWithBlogs = await User.findById(user).populate({path: "savedBloged", select:"title featureImg createdAt", populate:{path: "categories", select: "name" }});
     if (!userWithBlogs) {
       return res.status(404).send("User not found");
     }
