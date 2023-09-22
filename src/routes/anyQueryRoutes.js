@@ -28,12 +28,33 @@ router.post("/create/query", verifyUser, async (req, res) => {
 
 router.get("/all/query", async (req, res) => {
   try {
-    const allQuery = await Query.find();
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    const total = await Categories.countDocuments();
+
+    const allQuery = await Query.find().sort({ createdAt: -1 });
     if (!allQuery.length > 0) {
       return res.status(400).send("no query found!");
     }
-    // console.log(allQuery);
-    res.status(200).send({ success: true, data: allQuery });
+    
+    const totalPages = Math.ceil(allCategory.length / limit);
+
+    res.status(200).send({ success: true, allQuery, page, totalPages, limit, total});
+  } catch (error) {
+    console.error("Error creating blog post:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/one/query/:queryId", async (req, res) => {
+  try {
+    const queryId = req.params.queryId
+    const query = await Query.findById(queryId);
+    if (!query.length > 0 || !query || query == null) {
+      return res.status(400).send("no query found!");
+    }
+    res.status(200).send({ success: true, query });
   } catch (error) {
     console.error("Error creating blog post:", error);
     return res.status(500).json({ error: "Internal server error" });
