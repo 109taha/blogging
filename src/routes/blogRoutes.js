@@ -49,7 +49,7 @@ router.post(
             const uploader = await cloudinary.uploader.upload(path, {
               folder: "blogging",
             });
-            attachArtwork.push({ url: uploader.url });
+            attachArtwork.push({ url: uploader.secure_url });
             fs.unlinkSync(path);
           } catch (err) {
             if (attachArtwork?.length) {
@@ -71,6 +71,7 @@ router.post(
       if (alreadyCreated) {
         return res.status(200).send(`You already created ${name} Category`);
       }
+      return
       const newCategory = new Categories({
         name,
         description,
