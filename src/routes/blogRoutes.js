@@ -342,7 +342,6 @@ router.put(
         }
       }
       const { title, data, categories } = req.body;
-      console.log(data)
        const newData = !data==undefined? JSON.parse(data): null
       const updateBlog = await Blog.findById(blogId);
       if (!updateBlog) {
@@ -352,7 +351,6 @@ router.put(
       updateBlog.title = title || updateBlog.title;
       updateBlog.data = newData || updateBlog.data;
       updateBlog.categories = categories || updateBlog.categories;
-      console.log(updateBlog)
        
       await updateBlog.save();
 
