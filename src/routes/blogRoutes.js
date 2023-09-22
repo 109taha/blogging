@@ -102,7 +102,7 @@ router.put(
             const uploader = await cloudinary.uploader.upload(path, {
               folder: "blogging",
             });
-            attachArtwork.push({ url: uploader.url });
+            attachArtwork.push({ url: uploader.secure_url});
             fs.unlinkSync(path);
           } catch (err) {
             if (attachArtwork.length > 0) {
@@ -258,7 +258,7 @@ router.post(
             const uploader = await cloudinary.uploader.upload(path, {
               folder: "blogging",
             });
-            featureImg.push({ url: uploader.url });
+            featureImg.push({ url: uploader.secure_url});
             fs.unlinkSync(path);
           } catch (err) {
             if (featureImg?.length) {
@@ -352,7 +352,7 @@ router.put(
             const uploader = await cloudinary.uploader.upload(path, {
               folder: "blogging",
             });
-            featureImg.push({ url: uploader.url });
+            featureImg.push({  url: uploader.secure_url });
             fs.unlinkSync(path);
           } catch (err) {
             if (featureImg.length > 0) {
