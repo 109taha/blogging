@@ -49,7 +49,7 @@ router.post(
             const uploader = await cloudinary.uploader.upload(path, {
               folder: "blogging",
             });
-            attachArtwork.push();
+            attachArtwork.push({ url: uploader.url });
             fs.unlinkSync(path);
           } catch (err) {
             if (attachArtwork?.length) {
