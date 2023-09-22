@@ -31,14 +31,14 @@ router.get("/all/query", async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    const total = await Categories.countDocuments();
+    const total = await Query.countDocuments();
 
     const allQuery = await Query.find().sort({ createdAt: -1 });
     if (!allQuery.length > 0) {
       return res.status(400).send("no query found!");
     }
     
-    const totalPages = Math.ceil(allCategory.length / limit);
+    const totalPages = Math.ceil(allQuery.length / limit);
 
     res.status(200).send({ success: true, allQuery, page, totalPages, limit, total});
   } catch (error) {
@@ -51,7 +51,7 @@ router.get("/one/query/:queryId", async (req, res) => {
   try {
     const queryId = req.params.queryId
     const query = await Query.findById(queryId);
-    if (!query.length > 0 || !query || query == null) {
+    if ( query == null) {
       return res.status(400).send("no query found!");
     }
     res.status(200).send({ success: true, query });
