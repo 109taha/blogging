@@ -341,15 +341,15 @@ router.put(
           }
         }
       }
-      const { title, categories } = req.body;
-      const data = JSON.parse(req.body.data);
+      const { title, data, categories } = req.body;
+       const newData = JSON.parse(data)
       const updateBlog = await Blog.findById(blogId);
       if (!updateBlog) {
         return res.status(404).json({ error: "Blog not found" });
       }
       updateBlog.featureImg = featureImg.length > 0 ? featureImg[0].url : updateBlog.featureImg;
       updateBlog.title = title || updateBlog.title;
-      updateBlog.data = data || updateBlog.data;
+      updateBlog.data = newData || updateBlog.data;
       updateBlog.categories = categories || updateBlog.categories;
 
       await updateBlog.save();

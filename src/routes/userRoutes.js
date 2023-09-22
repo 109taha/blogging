@@ -89,13 +89,13 @@ router.get("/saved/blogs", verifyUser, async (req, res) => {
   }
 });
 
-router.post("/forgot-password/user", async (req, res) => {
+router.post("/forgot-password/admin", async (req, res) => {
   try {
     const email = req.body.email;
 
-    const user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).send("No user found on that email");
+    const user = await Admin.findOne({ email });
+    if (!user) {
+      return res.status(400).send("No Admin found on that email");
     }
     const token = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
     console.log(token);
@@ -117,9 +117,9 @@ router.post("/forgot-password", async (req, res) => {
   try {
     const email = req.body.email;
 
-    const staff = await Admin.findOne({ email });
-    if (staff) {
-      return res.stats(400).send("no Admin found on that email");
+    const staff = await User.findOne({ email });
+    if (!staff) {
+      return res.status(400).send("no User found on that email");
     }
     const token = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
     console.log(token);
