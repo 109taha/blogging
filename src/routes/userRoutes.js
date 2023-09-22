@@ -142,13 +142,15 @@ router.post("/reset-password/:email", async (req, res) => {
     const userEmail = req.params.email;
     const password = req.body.password;
 
-    const user = await User.findOne({email: userEmail});
+    let user = await User.findOne({email: userEmail});
     if (user) {
+      console.log(user.password)
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
-
+      
       user.password = hashedPassword;
-      await user.save();
+      user = await user.save();
+      console.log(user.password)
 
       res.status(200).send({ message: "Password reset successful" });
     }
