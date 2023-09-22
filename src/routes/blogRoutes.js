@@ -342,7 +342,8 @@ router.put(
         }
       }
       const { title, data, categories } = req.body;
-       const newData = JSON.parse(data)
+      console.log(data)
+       const newData = !data==undefined? JSON.parse(data): null
       const updateBlog = await Blog.findById(blogId);
       if (!updateBlog) {
         return res.status(404).json({ error: "Blog not found" });
@@ -351,7 +352,8 @@ router.put(
       updateBlog.title = title || updateBlog.title;
       updateBlog.data = newData || updateBlog.data;
       updateBlog.categories = categories || updateBlog.categories;
-
+      console.log(updateBlog)
+       
       await updateBlog.save();
 
       res.status(200).send({ success: true, updateBlog });
