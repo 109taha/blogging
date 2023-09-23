@@ -18,7 +18,7 @@ const imageFilter = (req, file, cb) => {
     file.mimetype === "image/jpeg" ||
     file.mimetype === "image/avif" ||
     file.mimetype === "image/jfif" ||
-    file.mimetype === "application/zip"
+    file.mimetype === "image/.webp"
   ) {
     cb(null, true);
   } else {
