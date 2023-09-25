@@ -202,10 +202,7 @@ router.get("/search/category/:title", async (req, res, next) => {
     const category = await Categories.find({name: { $regex: searchfield, $options: "i" }})
       .skip(skip)
       .limit(limit)
-      console.log(category)
-    if(!category.length > 0){
-      return res.status(400).send("no category found")
-    }
+
       const totalPages = Math.ceil(total / limit);
       const item = { category };
       res.status(200).send({data: item, page, totalPages, limit, total });
@@ -499,9 +496,7 @@ router.get("/search/blog/:title", async (req, res, next) => {
       .select("featureImg title createdAt")
       .skip(skip)
       .limit(limit)
-    if(!blog.length > 0){
-      return res.status(400).send("No blog found on that title")
-    }
+
       const totalPages = Math.ceil(total / limit);
       const item = { blog };
       res.status(200).send({data: item, page, totalPages, limit, total });
