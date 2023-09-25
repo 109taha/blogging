@@ -143,7 +143,13 @@ router.get("/all/category", async (req, res) => {
     const limit = 10;
     const total = await Categories.countDocuments();
 
-    const allCategory = await Categories.find()
+    let sortBY = {"createdAt": -1}
+    if(req.query.sort){
+      sortBY = JSON.parse(req.query.sort) 
+
+    }
+
+    const allCategory = await Categories.find().sort(sortBY)
 
     if (!allCategory.length > 0) {
       return res.status(404).send("No Category found");
@@ -180,6 +186,31 @@ router.get("/one/category/:categoryId", async (req, res) => {
   } catch (error) {
     console.error("Error retrieving categories:", error);
     return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/search/category/:title", async (req, res, next) => {
+  try {
+    const searchfield = req.params.title;
+
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    const total = await Blog.countDocuments();
+
+
+    const category = await Categories.find({name: { $regex: searchfield, $options: "i" }})
+      .skip(skip)
+      .limit(limit)
+      console.log(category)
+    if(!category.length > 0){
+      return res.status(400).send("no category found")
+    }
+      const totalPages = Math.ceil(total / limit);
+      const item = { category };
+      res.status(200).send({data: item, page, totalPages, limit, total });
+  } catch (error) {
+    res.status(500).send({ message: "Internal server error" });
   }
 });
 

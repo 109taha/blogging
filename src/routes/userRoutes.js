@@ -3,6 +3,9 @@ const JWT = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const Admin = require("../model/adminSchema");
 const User = require("../model/userSchema");
+const cloudinary = require("../helper/cloudinary");
+const upload = require("../helper/multer");
+const fs = require("fs");
 const { AdminJoiSchema, UserJoiSchema } = require("../helper/joi/joiSchema");
 const sendResetEmail = require("../helper/nodemailer");
 const { verifyUser } = require("../middleWares/verify");
@@ -67,6 +70,47 @@ router.post("/saved/blog", verifyUser, async (req, res) => {
     await userFromDB.save();
 
     return res.status(200).send("Blog saved successfully");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+});
+
+router.put("/profile/pic", upload.array("attachArtwork", 1), verifyUser, async (req, res) => {
+  const files = req.files;
+  const attachArtwork = [];
+
+  try {
+    if (files && files.length > 0) {
+      for (const file of files) {
+        const { path } = file;
+        try {
+          const uploader = await cloudinary.uploader.upload(path, {
+            folder: "blogging",
+          });
+          attachArtwork.push({ url: uploader.secure_url});
+          fs.unlinkSync(path);
+        } catch (err) {
+          if (attachArtwork.length > 0) {
+            const imgs = attachArtwork.map((obj) => obj.public_id);
+            cloudinary.api.delete_resources(imgs);
+          }
+          console.log(err);
+        }
+      }
+    }
+    console.log(attachArtwork)
+    const users = req.user;
+
+    const user = await User.findById(users);
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    user.profile_pic = attachArtwork.length > 0 ? attachArtwork[0].url : user.profile_pic;
+
+    await user.save();
+
+    res.status(200).send("Profile pic added successfully ");
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error: " + error.message);
@@ -293,9 +337,7 @@ router.post("/login", async (req, res) => {
     if (!admin) {
       return res.status(404).send("No admin found on that email");
     }
-    console.log(admin)
     const validUserPassword = await bcrypt.compare(password, admin.password);
-    console.log(validUserPassword)
     if (validUserPassword == false) {
       return res.status(400).send("Password is Incorrect")
     }
@@ -324,23 +366,23 @@ router.post("/login/user", async (req, res) => {
       });
     }
     const user = await User.findOne({ email });
-
+    console.log(user)
     if (!user) {
       return res.status(404).send("Invalid Email!");
     }
     const validUserPassword = await bcrypt.compare(password, user.password);
-
-    if (validUserPassword) {
-      const token = JWT.sign({ userId: user._id }, process.env.JWT_SEC);
-
-      return res.status(200).json({
-        success: true,
-        message: "User login successful",
-        token,
-        user,
-      });
+    console.log(validUserPassword)
+    if (validUserPassword == false) {
+      return res.status(400).send("Password Is incorrect")
     }
-    return res.status(400).send("Invalid email or password!")
+    const token = JWT.sign({ userId: user._id }, process.env.JWT_SEC);
+
+    return res.status(200).json({
+      success: true,
+      message: "User login successful",
+      token,
+      user,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
@@ -375,7 +417,6 @@ router.get("/search/user/:name", async (req, res, next) => {
     const user = await User.find({name: { $regex: searchfield, $options: "i" }})
       .skip(skip)
       .limit(limit)
-      .countDocuments()
       
     // const totalPages = Math.ceil(total / limit);
     const item = { user };
