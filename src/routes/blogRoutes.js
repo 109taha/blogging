@@ -196,7 +196,7 @@ router.get("/search/category/:title", async (req, res, next) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    const total = await Blog.countDocuments();
+    const total = await Blog.countDocuments({name: { $regex: searchfield, $options: "i" }});
 
 
     const category = await Categories.find({name: { $regex: searchfield, $options: "i" }})
@@ -492,14 +492,16 @@ router.get("/search/blog/:title", async (req, res, next) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    const total = await Blog.countDocuments();
+    const total = await Blog.countDocuments({title: { $regex: searchfield, $options: "i" }});
 
 
     const blog = await Blog.find({title: { $regex: searchfield, $options: "i" }})
       .select("featureImg title createdAt")
       .skip(skip)
       .limit(limit)
-
+    if(!blog.length > 0){
+      return res.status(400).send("No blog found on that title")
+    }
       const totalPages = Math.ceil(total / limit);
       const item = { blog };
       res.status(200).send({data: item, page, totalPages, limit, total });
@@ -515,7 +517,7 @@ router.get("/search/blog/category/:category", async (req, res, next) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    const total = await Blog.countDocuments();
+    const total = await Blog.countDocuments({categories: searchfield});
 
     const blog = await Blog.find({categories: searchfield})
       .select("featureImg title createdAt")

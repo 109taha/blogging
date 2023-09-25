@@ -412,15 +412,15 @@ router.get("/search/user/:name", async (req, res, next) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    
+    const total = await User.countDocuments({name: { $regex: searchfield, $options: "i" }})
 
     const user = await User.find({name: { $regex: searchfield, $options: "i" }})
       .skip(skip)
       .limit(limit)
       
-    // const totalPages = Math.ceil(total / limit);
+    const totalPages = Math.ceil(total / limit);
     const item = { user };
-    res.status(200).send({data: item, page, limit, total });
+    res.status(200).send({data: item, page,totalPages, limit, total });
   } catch (error) {
     res.status(500).send({ message: "Internal server error" });
   }
