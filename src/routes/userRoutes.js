@@ -239,11 +239,18 @@ router.get("/find/user", async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
+
+    let sortBY = {"createdAt": -1}
+    if(req.query.sort){
+      sortBY = JSON.parse(req.query.sort) 
+
+    }
+
     const total = await User.countDocuments();
     const AllUser = await User.find()
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 })
+      .sort(sortBY)
 
     if (!AllUser.length > 0) {
       return res.status(400).send("No user found!");

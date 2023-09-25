@@ -457,12 +457,21 @@ router.delete("/delete/blog/:Id", verifyAdmin, async (req, res) => {
 router.get("/search/blog/:title", async (req, res, next) => {
   try {
     const searchfield = req.params.title;
-    const blog = await Blog.find({
-      title: { $regex: searchfield, $options: "i" },
-    }).select("featureImg title createdAt");
-    console.log(blog);
-    const item = { blog };
-    res.status(200).send(item);
+
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    const total = await Blog.countDocuments();
+
+
+    const blog = await Blog.find({title: { $regex: searchfield, $options: "i" }})
+      .select("featureImg title createdAt")
+      .skip(skip)
+      .limit(limit)
+      
+      const totalPages = Math.ceil(total / limit);
+      const item = { blog };
+      res.status(200).send({data: item, page, totalPages, limit, total });
   } catch (error) {
     res.status(500).send({ message: "Internal server error" });
   }
