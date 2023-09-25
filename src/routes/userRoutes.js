@@ -30,7 +30,7 @@ router.post("/create/admin", AdminJoiSchema, async (req, res) => {
       phone_number,
       devicetoken,
     });
-
+    console.log(newAdmin)
     await newAdmin.save();
     res
       .status(200)
@@ -280,7 +280,7 @@ router.get("/find/user/:id", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-
+    console.log(req.body)
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -293,10 +293,13 @@ router.post("/login", async (req, res) => {
     if (!admin) {
       return res.status(404).send("No admin found on that email");
     }
-    const validAdminPassword = await bcrypt.compare(password, admin.password);
-
-    if (validAdminPassword) {
-      const token = JWT.sign({ userId: admin._id }, process.env.JWT_SEC_ADMIN);
+    console.log(admin)
+    const validUserPassword = await bcrypt.compare(password, admin.password);
+    console.log(validUserPassword)
+    if (validUserPassword == false) {
+      return res.status(400).send("Password is Incorrect")
+    }
+    const token = JWT.sign({ userId: admin._id }, process.env.JWT_SEC_ADMIN);
 
       return res.status(200).json({
         success: true,
@@ -304,7 +307,6 @@ router.post("/login", async (req, res) => {
         token,
         user: admin,
       });
-    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Internal Server Error" });

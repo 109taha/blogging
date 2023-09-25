@@ -35,6 +35,9 @@ const UserSchema = new mongoose.Schema(
         ref: "Blog",
       },
     ],
+    profile_pic:{
+      type:String,
+    }
   },
   {
     timestamps: true,
