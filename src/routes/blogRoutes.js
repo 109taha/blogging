@@ -401,7 +401,8 @@ router.get("/all/blogs", async (req, res) => {
       .skip(skip)
       .limit(limit)
       .sort(sortBY)
-      .select("title featureImg createdAt");
+      .select("title featureImg createdAt views");
+
 
     if (!allBlog.length > 0) {
       return res.status(400).send("no blog found!");
@@ -468,7 +469,7 @@ router.get("/search/blog/:title", async (req, res, next) => {
       .select("featureImg title createdAt")
       .skip(skip)
       .limit(limit)
-      
+
       const totalPages = Math.ceil(total / limit);
       const item = { blog };
       res.status(200).send({data: item, page, totalPages, limit, total });
