@@ -142,10 +142,9 @@ router.get("/all/category", async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = 10;
-    const skip = (page - 1) * limit;
     const total = await Categories.countDocuments();
 
-    const allCategory = await Categories.find().sort({ createdAt: -1 });
+    const allCategory = await Categories.find()
 
     if (!allCategory.length > 0) {
       return res.status(404).send("No Category found");
@@ -157,6 +156,7 @@ router.get("/all/category", async (req, res) => {
       success: true,
       allCategory,
       total,
+      totalPages
     });
   } catch (error) {
     console.error("Error retrieving categories:", error);
@@ -391,11 +391,16 @@ router.get("/all/blogs", async (req, res) => {
     const skip = (page - 1) * limit;
     const total = await Blog.countDocuments();
 
+    let sortBY = {"createdAt": -1}
+    if(req.query.sort){
+      sortBY = JSON.parse(req.query.sort) 
+
+    }
     const allBlog = await Blog.find()
       .populate({ path: "categories", select: "name" })
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 })
+      .sort(sortBY)
       .select("title featureImg createdAt");
 
     if (!allBlog.length > 0) {
@@ -466,11 +471,21 @@ router.get("/search/blog/:title", async (req, res, next) => {
 router.get("/search/blog/category/:category", async (req, res, next) => {
   try {
     const searchfield = req.params.category;
-    const blog = await Blog.find({
-      categories: searchfield
-    }).select("featureImg title createdAt").populate({path: "categories", select: "name"})
+
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    const total = await Blog.countDocuments();
+
+    const blog = await Blog.find({categories: searchfield})
+      .select("featureImg title createdAt")
+      .skip(skip)
+      .limit(limit)
+      .populate({path: "categories", select: "name"})
+
+      const totalPages = Math.ceil(total / limit);
     const item = { blog };
-    res.status(200).send(item);
+    res.status(200).send({data: item, page, totalPages, limit, total });
   } catch (error) {
     res.status(500).send({ message: "Internal server error" });
   }
