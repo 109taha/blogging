@@ -71,7 +71,6 @@ router.post(
       if (alreadyCreated) {
         return res.status(200).send(`You already created ${name} Category`);
       }
-      return
       const newCategory = new Categories({
         name,
         description,
