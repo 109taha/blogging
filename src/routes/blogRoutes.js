@@ -202,13 +202,14 @@ router.get("/search/category/:title", async (req, res, next) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    const total = await Blog.countDocuments({name: { $regex: searchfield, $options: "i" }});
-    console.log(total)
-
+    let sortBY = {"createdAt": -1}
+    const total = await Categories.countDocuments({name: { $regex: searchfield, $options: "i" }});
+    
     const category = await Categories.find({name: { $regex: searchfield, $options: "i" }})
-      // .skip(skip)
-      // .limit(limit)
-    console.log(category)
+      .skip(skip)
+      .limit(limit)
+      .sort(sortBY)
+    
       const totalPages = Math.ceil(total / limit);
       const item = { category };
       res.status(200).send({data: item, page, totalPages, limit, total });
@@ -519,11 +520,13 @@ router.get("/search/blog/category/:category", async (req, res, next) => {
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
     const total = await Blog.countDocuments({categories: searchfield});
+    let sortBY = {"createdAt": -1}
 
     const blog = await Blog.find({categories: searchfield})
       .select("featureImg title createdAt")
       .skip(skip)
       .limit(limit)
+      .sort(sortBY)
       .populate({path: "categories", select: "name"})
 
       const totalPages = Math.ceil(total / limit);
