@@ -150,13 +150,16 @@ router.get("/all/category", async (req, res) => {
 
     }
 
-    const allCategory = await Categories.find().sort(sortBY)
+    const allCategory = await Categories.find()
+      .skip(skip)
+      .limit(limit)
+      .sort(sortBY)
 
     if (!allCategory.length > 0) {
       return res.status(404).send("No Category found");
     }
 
-    const totalPages = Math.ceil(allCategory.length / limit);
+    const totalPages = Math.ceil(total   / limit);
 
     res.status(200).send({
       success: true,
@@ -200,12 +203,12 @@ router.get("/search/category/:title", async (req, res, next) => {
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
     const total = await Blog.countDocuments({name: { $regex: searchfield, $options: "i" }});
-
+    console.log(total)
 
     const category = await Categories.find({name: { $regex: searchfield, $options: "i" }})
-      .skip(skip)
-      .limit(limit)
-
+      // .skip(skip)
+      // .limit(limit)
+    console.log(category)
       const totalPages = Math.ceil(total / limit);
       const item = { category };
       res.status(200).send({data: item, page, totalPages, limit, total });
