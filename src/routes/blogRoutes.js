@@ -140,7 +140,8 @@ router.put(
 router.get("/all/category", async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = 10;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
     const total = await Categories.countDocuments();
 
     let sortBY = {"createdAt": -1}
@@ -160,8 +161,10 @@ router.get("/all/category", async (req, res) => {
     res.status(200).send({
       success: true,
       allCategory,
-      total,
-      totalPages
+      page, 
+      totalPages, 
+      limit, 
+      total 
     });
   } catch (error) {
     console.error("Error retrieving categories:", error);
