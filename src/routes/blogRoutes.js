@@ -144,7 +144,7 @@ router.get("/all/category", async (req, res) => {
     const skip = (page - 1) * limit;
     const total = await Categories.countDocuments();
 
-    let sortBY = {"createdAt": -1}
+    let sortBY = { createdAt: -1 };
     if(req.query.sort){
       sortBY = JSON.parse(req.query.sort) 
 
