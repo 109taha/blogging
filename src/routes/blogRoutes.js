@@ -397,15 +397,17 @@ router.put(
           }
         }
       }
-      const { titles, data, categories } = req.body;
-       const newData = !data==undefined? JSON.parse(data): null
+      const { titles, categories } = req.body;
+      const data = JSON.parse(req.body.data);
+      console.log(data);
       const updateBlog = await Blog.findById(blogId);
       if (!updateBlog) {
         return res.status(404).json({ error: "Blog not found" });
       }
-      updateBlog.featureImg = featureImg.length > 0 ? featureImg[0].url : updateBlog.featureImg;
+      updateBlog.featureImg =
+        featureImg.length > 0 ? featureImg[0].url : updateBlog.featureImg;
       updateBlog.title = titles || updateBlog.title;
-      updateBlog.data = newData || updateBlog.data;
+      updateBlog.data = data || updateBlog.data;
       updateBlog.categories = categories || updateBlog.categories;
        
       await updateBlog.save();
