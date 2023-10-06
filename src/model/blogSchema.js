@@ -7,6 +7,14 @@ const BlogSchema = new mongoose.Schema(
       require: true,
       ref: "Admin",
     },
+    featureImg: {
+      type: String,
+      require: true,
+    },
+    title: {
+      type: String,
+      require: true,
+    },
     data: [
       {
         ctype: {
@@ -20,10 +28,14 @@ const BlogSchema = new mongoose.Schema(
         },
       },
     ],
-    Categories: {
-      type: mongoose.Schema.Types.ObjectId,
-      require: true,
-      ref: "Categories",
+    categories: {
+      type: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Categories",
+          require: true,
+        },
+      ],
     },
     views: {
       type: Number,
