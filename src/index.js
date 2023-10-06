@@ -23,7 +23,7 @@ app.listen(PORT, () => {
 });
 
 app.get("/", (req, res) => {
-  res.status(200).send("News Server Is Running");
+  res.status(200).send("Server Is Running");
 });
 
 const User = require("./routes/userRoutes");

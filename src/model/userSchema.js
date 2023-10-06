@@ -2,6 +2,13 @@ const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema(
   {
+    user_name: {
+      type: String,
+      unique: true,
+      trim: true,
+      require: true,
+      lowercase: true,
+    },
     email: {
       type: String,
       trim: true,
@@ -25,19 +32,11 @@ const UserSchema = new mongoose.Schema(
     phone_number: {
       type: Number,
       trim: true,
+      require: true,
     },
     devicetoken: {
       type: String,
     },
-    savedBloged: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Blog",
-      },
-    ],
-    profile_pic:{
-      type:String,
-    }
   },
   {
     timestamps: true,

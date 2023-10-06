@@ -1,22 +1,15 @@
 const mongoose = require("mongoose");
 
-const CategoriesSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      require: true,
-    },
-    description: {
-      type: String,
-      require: true,
-    },
-    img: {
-      type: String,
-      require: true,
-    },
+const CategoriesSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    require: true,
   },
-  { timestamps: true }
-);
+  description: {
+    type: String,
+    require: true,
+  },
+});
 
 const Categories = mongoose.model("Categories", CategoriesSchema);
 
