@@ -28,12 +28,33 @@ router.post("/create/query", verifyUser, async (req, res) => {
 
 router.get("/all/query", async (req, res) => {
   try {
-    const allQuery = await Query.find();
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    const total = await Query.countDocuments();
+
+    const allQuery = await Query.find().sort({ createdAt: -1 });
     if (!allQuery.length > 0) {
       return res.status(400).send("no query found!");
     }
-    // console.log(allQuery);
-    res.status(200).send({ success: true, data: allQuery });
+    
+    const totalPages = Math.ceil(allQuery.length / limit);
+
+    res.status(200).send({ success: true, allQuery, page, totalPages, limit, total});
+  } catch (error) {
+    console.error("Error creating blog post:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/one/query/:queryId", async (req, res) => {
+  try {
+    const queryId = req.params.queryId
+    const query = await Query.findById(queryId);
+    if ( query == null) {
+      return res.status(400).send("no query found!");
+    }
+    res.status(200).send({ success: true, query });
   } catch (error) {
     console.error("Error creating blog post:", error);
     return res.status(500).json({ error: "Internal server error" });
@@ -63,11 +84,11 @@ router.put("/update/query/:queryId", verifyUser, async (req, res) => {
 
     const query = await Query.findById(queryId);
     if (!query) {
-      return res.status(404).json({ error: "Query not found" });
+      return res.status(404).send("Query not found");
     }
 
     if (query.userId.toString() !== userId.toString()) {
-      return res.status(403).json({ error: "Permission denied" });
+      return res.status(403).sned("Permission denied");
     }
 
     const updatedQuery = req.body.query;

@@ -2,13 +2,6 @@ const mongoose = require("mongoose");
 
 const AdminSchema = new mongoose.Schema(
   {
-    user_name: {
-      type: String,
-      unique: true,
-      trim: true,
-      require: true,
-      lowercase: true,
-    },
     email: {
       type: String,
       trim: true,
@@ -32,10 +25,6 @@ const AdminSchema = new mongoose.Schema(
     phone_number: {
       type: Number,
       trim: true,
-      require: true,
-    },
-    devicetoken: {
-      type: String,
     },
   },
   {
